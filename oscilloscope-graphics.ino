@@ -5,17 +5,8 @@ OscilloscopeGraphics gfx = OscilloscopeGraphics(8);
 void setup() {}
 
 void loop() {
-  gfx.clipLine(50, 50, 205, 50);
-  gfx.clipLine(205, 50, 205, 205);
-  gfx.clipLine(205, 205, 50, 205);
-  gfx.clipLine(50, 205, 50, 50);
-
-  gfx.clipLine(-50, -50, 305, -50);
-  gfx.clipLine(-50, 305, 305, 305);
-
-  gfx.clipLine(-50, 127, 100, 127);
-  gfx.clipLine(305, 127, 155, 127);
-
-  gfx.clipLine(-50, -50, 305, 305);
-  gfx.clipLine(305, -50, -50, 305);
+  gfx.line(-0.5, -0.5, 0.5, -0.5);
+  gfx.line(-0.5, 0.5, 0.5, 0.5);
+  gfx.line(-0.75, 0, 0.75, 0);
+  gfx.line(-1.25, -1.25, 1.25, 1.25);
 }
