@@ -3,8 +3,18 @@
 
 #include <math.h>
 
-struct Vector3D {
+struct Vector2D {
+  float x, y;
+};
+
+class Vector3D {
+ public:
   float x, y, z;
+
+  void project(Vector2D& target, int d) {
+    target.x = x / (z + d);
+    target.y = y / (z + d);
+  }
 };
 
 class Matrix {
