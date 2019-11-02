@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <math.h>
+#include "Matrix.h"
 
 class OscilloscopeGraphics {
   const uint32_t CLIP_INSIDE = 0;
