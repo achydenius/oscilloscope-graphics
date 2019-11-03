@@ -1,4 +1,4 @@
-#include "OscilloscopeGraphics.h"
+#include "Renderer.h"
 
 #define CANVAS_MIN -1.0
 #define CANVAS_MAX 1.0
@@ -6,7 +6,9 @@
 // Transform point from canvas space to output space
 #define transform(p) ((uint32_t)(((p * 0.5) + 0.5) * maxValue))
 
-void OscilloscopeGraphics::plot(float x, float y) {
+using namespace osc;
+
+void Renderer::plot(float x, float y) {
   if (x < CANVAS_MIN || x > CANVAS_MAX || y < CANVAS_MIN || y > CANVAS_MAX) {
     return;
   }
@@ -21,7 +23,7 @@ void OscilloscopeGraphics::plot(float x, float y) {
  * Cohen-Sutherland line clipping algorithm implementation:
  * https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm
  */
-void OscilloscopeGraphics::line(float x0, float y0, float x1, float y1) {
+void Renderer::line(float x0, float y0, float x1, float y1) {
   uint32_t c0 = getClipCode(x0, y0);
   uint32_t c1 = getClipCode(x1, y1);
   bool accept = false;
@@ -76,7 +78,7 @@ void OscilloscopeGraphics::line(float x0, float y0, float x1, float y1) {
   }
 }
 
-uint32_t OscilloscopeGraphics::getClipCode(float x, float y) {
+uint32_t Renderer::getClipCode(float x, float y) {
   uint32_t code = CLIP_INSIDE;
 
   if (x < CANVAS_MIN) {
@@ -99,8 +101,7 @@ uint32_t OscilloscopeGraphics::getClipCode(float x, float y) {
  * DDA line drawing algorithm implementation:
  * https://www.geeksforgeeks.org/dda-line-generation-algorithm-computer-graphics/
  */
-void OscilloscopeGraphics::outputLine(uint32_t x0, uint32_t y0, uint32_t x1,
-                                      uint32_t y1) {
+void Renderer::outputLine(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1) {
   int32_t dx = x1 - x0;
   int32_t dy = y1 - y0;
 

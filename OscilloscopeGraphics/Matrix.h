@@ -3,6 +3,7 @@
 
 #include <math.h>
 
+namespace osc {
 struct Vector2D {
   float x, y;
 };
@@ -89,5 +90,5 @@ class Matrix {
         (m[2][0] * source.x) + (m[2][1] * source.y) + (m[2][2] * source.z);
   }
 };
-
+}  // namespace osc
 #endif

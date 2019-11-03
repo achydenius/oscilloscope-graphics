@@ -5,18 +5,18 @@ float mapf(float x, float in_min, float in_max, float out_min, float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-OscilloscopeGraphics gfx = OscilloscopeGraphics(10);
+osc::Renderer renderer = osc::Renderer(10);
 
 const int vertexCount = 4;
-Vector3D original[vertexCount] = {
+osc::Vector3D original[vertexCount] = {
   { -1.0, 1.0, 0 },
   { 1.0, 1.0, 0 },
   { 1.0, -1.0, 0 },
   { -1.0, -1.0, 0 }
 };
-Vector3D transformed[vertexCount];
-Vector2D projected[vertexCount];
-Matrix rotation, scaling, matrix;
+osc::Vector3D transformed[vertexCount];
+osc::Vector2D projected[vertexCount];
+osc::Matrix rotation, scaling, matrix;
 
 void setup() {}
 
@@ -32,9 +32,9 @@ void loop() {
   }
 
   for (int i = 0; i < vertexCount; i++) {
-    Vector2D a = projected[i];
-    Vector2D b = projected[(i + 1) % 4];
-    gfx.line(a.x, a.y, b.x, b.y);
+    osc::Vector2D a = projected[i];
+    osc::Vector2D b = projected[(i + 1) % 4];
+    renderer.line(a.x, a.y, b.x, b.y);
   }
   
   phase += 0.01;
