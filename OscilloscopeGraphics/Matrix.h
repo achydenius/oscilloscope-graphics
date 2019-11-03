@@ -19,21 +19,17 @@ class Vector3D {
 };
 
 class Matrix {
-  float m[3][3];
+  float m[4][4];
 
  public:
   Matrix() { identity(); }
 
   void identity() {
-    m[0][0] = 1.0;
-    m[0][1] = 0;
-    m[0][2] = 0;
-    m[1][0] = 0;
-    m[1][1] = 1.0;
-    m[1][2] = 0;
-    m[2][0] = 0;
-    m[2][1] = 0;
-    m[2][2] = 1.0;
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        m[i][j] = i == j ? 1.0 : 0;
+      }
+    }
   }
 
   void rotation(float x, float y, float z) {
@@ -47,48 +43,55 @@ class Matrix {
     m[0][0] = cosY * cosZ;
     m[0][1] = -cosY * sinZ;
     m[0][2] = sinY;
+    m[0][3] = 0;
 
     m[1][0] = sinX * sinY * cosZ + cosX * sinZ;
     m[1][1] = -sinX * sinY * sinZ + cosX * cosZ;
     m[1][2] = -sinX * cosY;
+    m[1][3] = 0;
 
     m[2][0] = -cosX * sinY * cosZ + sinX * sinZ;
     m[2][1] = cosX * sinY * sinZ + sinX * cosZ;
     m[2][2] = cosX * cosY;
+    m[2][3] = 0;
+
+    m[3][0] = 0;
+    m[3][1] = 0;
+    m[3][2] = 0;
+    m[3][3] = 1.0;
+  }
+
+  void translation(float x, float y, float z) {
+    identity();
+    m[0][3] = x;
+    m[1][3] = y;
+    m[2][3] = z;
   }
 
   void scaling(float scale) {
+    identity();
     m[0][0] = scale;
-    m[0][1] = 0;
-    m[0][2] = 0;
-    m[1][0] = 0;
     m[1][1] = scale;
-    m[1][2] = 0;
-    m[2][0] = 0;
-    m[2][1] = 0;
     m[2][2] = scale;
   }
 
   void multiply(Matrix& a, Matrix& b) {
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        float sum = 0;
-        for (int k = 0; k < 3; k++) {
-          sum += a.m[i][k] * b.m[k][j];
-        }
-        m[i][j] = sum;
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        m[i][j] = a.m[i][0] * b.m[0][j] + a.m[i][1] * b.m[1][j] +
+                  a.m[i][2] * b.m[2][j] + a.m[i][3] * b.m[3][j];
       }
     }
   }
 
   void transform(Vector3D& source, Vector3D& target) {
-    target.x =
-        (m[0][0] * source.x) + (m[0][1] * source.y) + (m[0][2] * source.z);
-    target.y =
-        (m[1][0] * source.x) + (m[1][1] * source.y) + (m[1][2] * source.z);
-    target.z =
-        (m[2][0] * source.x) + (m[2][1] * source.y) + (m[2][2] * source.z);
+    target.x = (m[0][0] * source.x) + (m[0][1] * source.y) +
+               (m[0][2] * source.z) + m[0][3];
+    target.y = (m[1][0] * source.x) + (m[1][1] * source.y) +
+               (m[1][2] * source.z) + m[1][3];
+    target.z = (m[2][0] * source.x) + (m[2][1] * source.y) +
+               (m[2][2] * source.z) + m[2][3];
   }
-};
+};  // namespace osc
 }  // namespace osc
 #endif

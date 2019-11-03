@@ -9,26 +9,26 @@ osc::Renderer renderer = osc::Renderer(10);
 
 const int vertexCount = 4;
 osc::Vector3D original[vertexCount] = {
-  { -1.0, 1.0, 0 },
-  { 1.0, 1.0, 0 },
-  { 1.0, -1.0, 0 },
-  { -1.0, -1.0, 0 }
+  { -10.0,  10.0, 0 },
+  {  10.0,  10.0, 0 },
+  {  10.0, -10.0, 0 },
+  { -10.0, -10.0, 0 }
 };
 osc::Vector3D transformed[vertexCount];
 osc::Vector2D projected[vertexCount];
-osc::Matrix rotation, scaling, matrix;
+osc::Matrix rotation, translation, scaling, matrix;
 
 void setup() {}
 
 float phase = 0;
 void loop() {
   rotation.rotation(0, phase * 0.3, phase);
-  scaling.scaling(mapf(sin(phase), -1.0, 1.0, 5.0, 7.5));
-  matrix.multiply(rotation, scaling);
+  translation.translation(sin(phase) * 10.0, 0, 10.0);
+  matrix.multiply(translation, rotation);
   
   for (int i = 0; i < vertexCount; i++) {
     matrix.transform(original[i], transformed[i]);
-    transformed[i].project(projected[i], 10.0);
+    transformed[i].project(projected[i], 5.0);
   }
 
   for (int i = 0; i < vertexCount; i++) {
