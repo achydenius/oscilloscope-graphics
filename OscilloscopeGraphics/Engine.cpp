@@ -18,9 +18,10 @@ void Engine::render(Object& object, Matrix& camera, float dist) {
     transformed.project(projected[i], dist);
   }
 
-  for (int i = 0; i < object.mesh->vertexCount; i++) {
-    osc::Vector2D a = projected[i];
-    osc::Vector2D b = projected[(i + 1) % 4];
+  for (int i = 0; i < object.mesh->edgeCount; i++) {
+    Edge* edge = &object.mesh->edges[i];
+    osc::Vector2D a = projected[edge->a];
+    osc::Vector2D b = projected[edge->b];
     renderer->line(a.x, a.y, b.x, b.y);
   }
 }

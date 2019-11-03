@@ -5,10 +5,16 @@
 #include "Renderer.h"
 
 namespace osc {
+struct Edge {
+  int a, b;
+};
+
 struct Mesh {
  public:
   int vertexCount;
+  int edgeCount;
   Vector3D* vertices;
+  Edge* edges;
 };
 
 class Object {
