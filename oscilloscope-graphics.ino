@@ -16,18 +16,20 @@ osc::Vector3D original[vertexCount] = {
 };
 osc::Vector3D transformed[vertexCount];
 osc::Vector2D projected[vertexCount];
-osc::Matrix rotation, translation, scaling, matrix;
+osc::Matrix rotation, translation, scaling, matrix, camera;
 
 void setup() {}
 
 float phase = 0;
 void loop() {
-  rotation.rotation(0, phase * 0.3, phase);
-  translation.translation(sin(phase) * 10.0, 0, 10.0);
-  matrix.multiply(translation, rotation);
+  rotation.rotation(0, 0, phase);
+  osc::Vector3D eye = { 0, sin(phase) * 5.0, -10.0 };
+  osc::Vector3D target = { 0, 0, 0 };
+  camera.lookAt(eye, target);
+  matrix.multiply(camera, rotation);
   
   for (int i = 0; i < vertexCount; i++) {
-    matrix.transform(original[i], transformed[i]);
+    matrix.multiply(original[i], transformed[i]);
     transformed[i].project(projected[i], 5.0);
   }
 

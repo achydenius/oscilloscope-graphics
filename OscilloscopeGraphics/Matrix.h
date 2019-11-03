@@ -16,6 +16,33 @@ class Vector3D {
     target.x = x / (z + d);
     target.y = y / (z + d);
   }
+
+  void subtract(Vector3D& a, Vector3D& b) {
+    x = a.x - b.x;
+    y = a.y - b.y;
+    z = a.z - b.z;
+  }
+
+  float length() { return sqrt(x * x + y * y + z * z); }
+
+  void normalize() {
+    float len = length();
+    if (len != 0) {
+      x /= len;
+      y /= len;
+      z /= len;
+    }
+  }
+
+  void cross(Vector3D& a, Vector3D& b) {
+    x = a.y * b.z - a.z * b.y;
+    y = a.z * b.x - a.x * b.z;
+    z = a.x * b.y - a.y * b.x;
+  }
+
+  float dot(Vector3D& vector) {
+    return x * vector.x + y * vector.y + z * vector.z;
+  }
 };
 
 class Matrix {
@@ -75,6 +102,38 @@ class Matrix {
     m[2][2] = scale;
   }
 
+  void lookAt(Vector3D& eye, Vector3D& target) {
+    Vector3D forward, side;
+    Vector3D up = {0, 1.0, 0};
+
+    forward.subtract(target, eye);
+    forward.normalize();
+    side.cross(forward, up);
+    side.normalize();
+    up.cross(side, forward);
+    up.normalize();
+
+    m[0][0] = side.x;
+    m[0][1] = up.x;
+    m[0][2] = -forward.x;
+    m[0][3] = -eye.dot(side);
+
+    m[1][0] = side.y;
+    m[1][1] = up.y;
+    m[1][2] = -forward.y;
+    m[1][3] = -eye.dot(up);
+
+    m[2][0] = side.z;
+    m[2][1] = up.z;
+    m[2][2] = -forward.z;
+    m[2][3] = -eye.dot(forward);
+
+    m[3][0] = 0;
+    m[3][1] = 0;
+    m[3][2] = 0;
+    m[3][3] = 1.0;
+  }
+
   void multiply(Matrix& a, Matrix& b) {
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
@@ -84,7 +143,7 @@ class Matrix {
     }
   }
 
-  void transform(Vector3D& source, Vector3D& target) {
+  void multiply(Vector3D& source, Vector3D& target) {
     target.x = (m[0][0] * source.x) + (m[0][1] * source.y) +
                (m[0][2] * source.z) + m[0][3];
     target.y = (m[1][0] * source.x) + (m[1][1] * source.y) +
