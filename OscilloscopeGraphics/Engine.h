@@ -30,11 +30,12 @@ class Object {
 };
 
 class Engine {
+  int xPin, yPin;
   Renderer* renderer;
   Vector2D* projected;
 
  public:
-  Engine(int resolution, int maxVertices);
+  Engine(int resolution, int xPin, int yPin, int maxVertices);
   void render(Object& object, Matrix& camera, float dist);
 };
 }  // namespace osc

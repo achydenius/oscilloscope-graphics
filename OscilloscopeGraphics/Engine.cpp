@@ -2,8 +2,10 @@
 
 using namespace osc;
 
-Engine::Engine(int resolution, int maxVertices) {
-  renderer = new Renderer(resolution);
+Engine::Engine(int resolution, int xp, int yp, int maxVertices) {
+  xPin = xp;
+  yPin = yp;
+  renderer = new Renderer(resolution, xPin, yPin);
   projected = new Vector2D[maxVertices];
 }
 

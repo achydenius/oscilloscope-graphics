@@ -13,8 +13,8 @@ void Renderer::plot(float x, float y) {
     return;
   }
 
-  analogWrite(A0, transform(x));
-  analogWrite(A1, transform(y));
+  analogWrite(xPin, transform(x));
+  analogWrite(yPin, transform(y));
 }
 
 /*
@@ -112,8 +112,8 @@ void Renderer::outputLine(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1) {
   float x = x0;
   float y = y0;
   for (int32_t i = 0; i <= steps; i++) {
-    analogWrite(A0, x);
-    analogWrite(A1, y);
+    analogWrite(xPin, x);
+    analogWrite(yPin, y);
     x += ix;
     y += iy;
   }

@@ -1,11 +1,8 @@
 #include <math.h>
 #include <OscilloscopeGraphics.h>
 
-float mapf(float x, float in_min, float in_max, float out_min, float out_max) {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
+osc::Engine engine(10, A0, A1, 8);
 
-osc::Engine engine(10, 8);
 osc::Vector3D vertices[] = {
   { -10.0, 10.0, 10.0 },
   { -10.0, 10.0, -10.0 },

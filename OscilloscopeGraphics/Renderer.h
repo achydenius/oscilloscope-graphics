@@ -12,11 +12,13 @@ class Renderer {
   const uint32_t CLIP_BOTTOM = 4;
   const uint32_t CLIP_TOP = 8;
 
-  uint8_t resolution;
+  const uint8_t resolution;
+  const uint8_t xPin, yPin;
   uint32_t maxValue;
 
  public:
-  Renderer(uint8_t resolution) : resolution(resolution) {
+  Renderer(uint8_t resolution, uint8_t xPin, uint8_t yPin)
+      : resolution(resolution), xPin(xPin), yPin(yPin) {
     analogWriteResolution(resolution);
     maxValue = pow(2, resolution) - 1;
   }
