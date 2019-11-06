@@ -4,17 +4,18 @@
 #include <math.h>
 
 namespace osc {
-struct Vector2D {
-  float x, y;
-};
-
 class Vector3D {
  public:
   float x, y, z;
 
-  void project(Vector2D& target, int d) {
-    target.x = x / (z + d);
-    target.y = y / (z + d);
+  void set(float nx, float ny, float nz) {
+    x = nx;
+    y = ny;
+    z = nz;
+  }
+
+  bool equals(Vector3D& vector) {
+    return x == vector.x && y == vector.y && z == vector.z;
   }
 
   void subtract(Vector3D& a, Vector3D& b) {
@@ -42,6 +43,16 @@ class Vector3D {
 
   float dot(Vector3D& vector) {
     return x * vector.x + y * vector.y + z * vector.z;
+  }
+};
+
+class Vector2D {
+ public:
+  float x, y;
+
+  void project(Vector3D& vector, int d) {
+    x = vector.x / (vector.z + d);
+    y = vector.y / (vector.z + d);
   }
 };
 

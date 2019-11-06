@@ -17,7 +17,7 @@ void Engine::render(Object& object, Matrix& camera, float dist) {
   for (int i = 0; i < object.mesh->vertexCount; i++) {
     Vector3D transformed;
     view.multiply(object.mesh->vertices[i], transformed);
-    transformed.project(projected[i], dist);
+    projected[i].project(transformed, dist);
   }
 
   for (int i = 0; i < object.mesh->edgeCount; i++) {
