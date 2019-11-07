@@ -29,9 +29,7 @@ osc::Object object(&mesh);
 osc::Matrix camera;
 
 void setup() {
-  osc::Vector3D eye = { 0, 0, -20.0 };
-  osc::Vector3D target = { 0, 0, 0 };
-  camera.lookAt(eye, target);
+  camera.translation(0, 0, 20.0);
 }
 
 float phase = 0;

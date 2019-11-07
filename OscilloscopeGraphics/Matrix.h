@@ -106,45 +106,6 @@ class Matrix {
     m[2][3] = z;
   }
 
-  void scaling(float scale) {
-    identity();
-    m[0][0] = scale;
-    m[1][1] = scale;
-    m[2][2] = scale;
-  }
-
-  void lookAt(Vector3D& eye, Vector3D& target) {
-    Vector3D forward, side;
-    Vector3D up = {0, 1.0, 0};
-
-    forward.subtract(target, eye);
-    forward.normalize();
-    side.cross(forward, up);
-    side.normalize();
-    up.cross(side, forward);
-    up.normalize();
-
-    m[0][0] = side.x;
-    m[0][1] = up.x;
-    m[0][2] = -forward.x;
-    m[0][3] = -eye.dot(side);
-
-    m[1][0] = side.y;
-    m[1][1] = up.y;
-    m[1][2] = -forward.y;
-    m[1][3] = -eye.dot(up);
-
-    m[2][0] = side.z;
-    m[2][1] = up.z;
-    m[2][2] = -forward.z;
-    m[2][3] = -eye.dot(forward);
-
-    m[3][0] = 0;
-    m[3][1] = 0;
-    m[3][2] = 0;
-    m[3][3] = 1.0;
-  }
-
   void multiply(Matrix& a, Matrix& b) {
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
