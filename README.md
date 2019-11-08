@@ -2,9 +2,13 @@
 
 Simple vector graphics engine for Arduino and oscilloscope. Tested with [Adafruit Metro M4](https://www.adafruit.com/product/3382) but any Arduino compatible board with two DACs will most likely work.
 
-The engine includes a tiny 3D math library, a renderer for drawing lines on oscilloscope and basic primitives for creating objects.
+The engine includes a tiny 3D math library, a renderer for drawing lines on oscilloscope and some basic primitives for creating objects.
 
-A simple example for drawing and animating a square:
+![Picture of oscilloscope running example animation](https://raw.githubusercontent.com/achydenius/oscilloscope-graphics/master/square.jpg)
+
+## Code example
+
+Drawing and animating a square (as seen in the picture above):
 
 ```cpp
 #include <math.h>
