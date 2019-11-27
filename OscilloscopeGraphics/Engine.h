@@ -1,6 +1,8 @@
 #ifndef __ENGINE__
 #define __ENGINE__
 
+#define PROFILE
+
 #include "Renderer.h"
 #include "src/cglm/include/cglm/cglm.h"
 
