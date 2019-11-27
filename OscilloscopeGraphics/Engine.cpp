@@ -6,24 +6,31 @@ Engine::Engine(int resolution, int xp, int yp, int maxVertices) {
   xPin = xp;
   yPin = yp;
   renderer = new Renderer(resolution, xPin, yPin);
-  projected = new Vector2D[maxVertices];
+  projected = new vec2[maxVertices];
 }
 
-void Engine::render(Object& object, Matrix& camera, float dist) {
-  Matrix world, view;
-  world.multiply(object.translation, object.rotation);
-  view.multiply(camera, world);
+void Engine::render(Object& object) {
+  mat4 projection, translation, rotation, matrix;
+
+  glm_perspective_default(1.0, projection);
+  glm_translate_make(translation, object.translation);
+  glm_euler(object.rotation, rotation);
+
+  mat4* matrices[] = {&projection, &translation, &rotation};
+  glm_mat4_mulN(matrices, 3, matrix);
 
   for (int i = 0; i < object.mesh->vertexCount; i++) {
-    Vector3D transformed;
-    view.multiply(object.mesh->vertices[i], transformed);
-    projected[i].project(transformed, dist);
+    vec4 vertex, transformed;
+    glm_vec4(object.mesh->vertices[i], 1.0, vertex);
+    glm_mat4_mulv(matrix, vertex, transformed);
+
+    projected[i][0] = transformed[0] / transformed[3];
+    projected[i][1] = transformed[1] / transformed[3];
   }
 
   for (int i = 0; i < object.mesh->edgeCount; i++) {
     Edge* edge = &object.mesh->edges[i];
-    osc::Vector2D a = projected[edge->a];
-    osc::Vector2D b = projected[edge->b];
-    renderer->line(a.x, a.y, b.x, b.y);
+    renderer->line(projected[edge->a][0], projected[edge->a][1],
+                   projected[edge->b][0], projected[edge->b][1]);
   }
 }
