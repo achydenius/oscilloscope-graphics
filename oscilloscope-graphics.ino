@@ -29,16 +29,18 @@ osc::Edge edges[] = {
 osc::Mesh mesh = {
   8, 12, vertices, edges
 };
-osc::Object object(&mesh); 
+osc::Object object(&mesh);
 
-void setup() {}
+void setup() {
+  engine.getRenderer()->setWriteMode(osc::Renderer::DACWriteMode::INLINE);
+}
 
 float phase = 0;
 void loop() {
   object.setRotation(0, phase * 0.5, phase);
   object.setTranslation(sin(phase), 0, -2.5);
-  
+
   engine.render(object);
 
-  phase += 0.01;
+  phase += 0.005;
 }

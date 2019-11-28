@@ -8,7 +8,7 @@ using namespace osc;
 Engine::Engine(int resolution, int xp, int yp, int maxVertices) {
   xPin = xp;
   yPin = yp;
-  renderer = new Renderer(resolution, xPin, yPin);
+  renderer = new Renderer(resolution, xPin, yPin, Renderer::DACWriteMode::DIRECT);
   projected = new vec2[maxVertices];
 }
 
@@ -52,4 +52,8 @@ void Engine::render(Object& object) {
   timer.stop();
   timer.print("render");
 #endif
+}
+
+Renderer* Engine::getRenderer() {
+  return renderer;
 }

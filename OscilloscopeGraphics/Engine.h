@@ -1,7 +1,7 @@
 #ifndef __ENGINE__
 #define __ENGINE__
 
-#define PROFILE
+// #define PROFILE
 
 #include "Renderer.h"
 #include "src/cglm/include/cglm/cglm.h"
@@ -45,6 +45,7 @@ class Engine {
  public:
   Engine(int resolution, int xPin, int yPin, int maxVertices);
   void render(Object& object);
+  Renderer* getRenderer();
 };
 }  // namespace osc
 
