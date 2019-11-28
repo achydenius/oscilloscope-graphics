@@ -1,16 +1,24 @@
 #include "Engine.h"
+#ifdef PROFILE
+#include "Timer.h"
+#endif
 
 using namespace osc;
 
 Engine::Engine(int resolution, int xp, int yp, int maxVertices) {
   xPin = xp;
   yPin = yp;
-  renderer = new Renderer(resolution, xPin, yPin);
+  renderer = new Renderer(resolution, xPin, yPin, Renderer::DACWriteMode::DIRECT);
   projected = new vec2[maxVertices];
 }
 
 void Engine::render(Object& object) {
   mat4 projection, translation, rotation, matrix;
+
+#ifdef PROFILE
+  Timer timer;
+  timer.start();
+#endif
 
   glm_perspective_default(1.0, projection);
   glm_translate_make(translation, object.translation);
@@ -28,9 +36,24 @@ void Engine::render(Object& object) {
     projected[i][1] = transformed[1] / transformed[3];
   }
 
+#ifdef PROFILE
+  timer.stop();
+  timer.print("transform");
+  timer.start();
+#endif
+
   for (int i = 0; i < object.mesh->edgeCount; i++) {
     Edge* edge = &object.mesh->edges[i];
     renderer->line(projected[edge->a][0], projected[edge->a][1],
                    projected[edge->b][0], projected[edge->b][1]);
   }
+
+#ifdef PROFILE
+  timer.stop();
+  timer.print("render");
+#endif
+}
+
+Renderer* Engine::getRenderer() {
+  return renderer;
 }

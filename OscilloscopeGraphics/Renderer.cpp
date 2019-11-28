@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include <Arduino.h>
 
 #define CANVAS_MIN -1.0
 #define CANVAS_MAX 1.0
@@ -7,6 +8,10 @@
 #define transform(p) ((uint32_t)(((p * 0.5) + 0.5) * maxValue))
 
 using namespace osc;
+
+void Renderer::setWriteMode(DACWriteMode mode) {
+  writeMode = mode;
+}
 
 void Renderer::plot(float x, float y) {
   if (x < CANVAS_MIN || x > CANVAS_MAX || y < CANVAS_MIN || y > CANVAS_MAX) {
@@ -111,10 +116,48 @@ void Renderer::outputLine(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1) {
 
   float x = x0;
   float y = y0;
-  for (int32_t i = 0; i <= steps; i++) {
-    analogWrite(xPin, x);
-    analogWrite(yPin, y);
-    x += ix;
-    y += iy;
+  uint32_t shift = 12 - resolution;
+
+  if (writeMode == DACWriteMode::INLINE) {
+    for (int32_t i = 0; i <= steps; i++) {
+      dacWriteInline(x, y, shift);
+      x += ix;
+      y += iy;
+    }
+  } else if (writeMode == DACWriteMode::DIRECT) {
+    for (int32_t i = 0; i <= steps; i++) {
+      dacWriteDirect(x, y, shift);
+      x += ix;
+      y += iy;
+    }
+  } else {
+    for (int32_t i = 0; i <= steps; i++) {
+      dacWriteAnalogWrite(x, y);
+      x += ix;
+      y += iy;
+    }
   }
+}
+
+inline void Renderer::dacWriteAnalogWrite(uint32_t x, uint32_t y) {
+  analogWrite(xPin, x);
+  analogWrite(yPin, y);
+}
+
+inline void Renderer::dacWriteInline(uint32_t x, uint32_t y, uint32_t shift) {
+  while (!DAC->STATUS.bit.READY0)
+    ;
+  while (DAC->SYNCBUSY.bit.DATA0)
+    ;
+  DAC->DATA[0].reg = x << shift;
+
+  while (!DAC->STATUS.bit.READY1)
+    ;
+  while (DAC->SYNCBUSY.bit.DATA1)
+    ;
+  DAC->DATA[1].reg = y << shift;
+}
+inline void Renderer::dacWriteDirect(uint32_t x, uint32_t y, uint32_t shift) {
+  DAC->DATA[0].reg = x << shift;
+  DAC->DATA[1].reg = y << shift;
 }
