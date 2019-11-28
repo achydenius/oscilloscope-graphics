@@ -6,16 +6,20 @@
 namespace osc {
 class Timer {
   unsigned long begin;
-  unsigned long end;
+  unsigned long total;
 
  public:
-  Timer() { Serial.begin(9600); }
+  Timer() {
+    reset();
+    Serial.begin(9600);
+  }
   void start() { begin = micros(); }
-  void stop() { end = micros(); }
+  void stop() { total += micros() - begin; }
+  void reset() { total = 0; }
   void print(char* id) {
     Serial.print(id);
     Serial.print(": ");
-    Serial.println(end - begin);
+    Serial.println(total);
   }
 };
 }  // namespace osc

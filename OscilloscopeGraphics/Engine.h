@@ -44,7 +44,7 @@ class Engine {
 
  public:
   Engine(int resolution, int xPin, int yPin, int maxVertices);
-  void render(Object& object);
+  void render(Object* objects, int objectCount);
   Renderer* getRenderer();
 };
 }  // namespace osc

@@ -39,8 +39,8 @@ void loop() {
   object.setRotation(0, 0, phase);
   object.setTranslation(sin(phase), 0, -4.0);
 
-  engine.render(object);
+  engine.render(&object, 1);
 
-  phase += 0.01;
+  phase += 0.001;
 }
 ```
