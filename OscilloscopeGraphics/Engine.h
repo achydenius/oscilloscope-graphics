@@ -37,6 +37,23 @@ class Object {
   }
 };
 
+class Camera {
+ public:
+  vec3 eye, center, up;
+
+  Camera() : up({0, 1.0, 0}){};
+  void setEye(float x, float y, float z) {
+    eye[0] = x;
+    eye[1] = y;
+    eye[2] = z;
+  }
+  void setCenter(float x, float y, float z) {
+    center[0] = x;
+    center[1] = y;
+    center[2] = z;
+  }
+};
+
 class Engine {
   int xPin, yPin;
   Renderer* renderer;
@@ -44,7 +61,7 @@ class Engine {
 
  public:
   Engine(int resolution, int xPin, int yPin, int maxVertices);
-  void render(Object* objects, int objectCount);
+  void render(Object** objects, int objectCount, Camera& camera);
   Renderer* getRenderer();
 };
 }  // namespace osc

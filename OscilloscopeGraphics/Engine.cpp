@@ -17,28 +17,29 @@ Engine::Engine(int resolution, int xp, int yp, int maxVertices) {
   xPin = xp;
   yPin = yp;
   renderer =
-      new Renderer(resolution, xPin, yPin, Renderer::DACWriteMode::DIRECT);
+      new Renderer(resolution, xPin, yPin, Renderer::DACWriteMode::STANDARD);
   projected = new vec2[maxVertices];
 }
 
-void Engine::render(Object* objects, int objectCount) {
-  mat4 projection, translation, rotation, matrix;
+void Engine::render(Object** objects, int objectCount, Camera& camera) {
+  mat4 projection, view, translation, rotation, matrix;
 
 #ifdef PROFILE
   Timer transformTimer, renderTimer;
 #endif
 
   for (int i = 0; i < objectCount; i++) {
-    Object* object = &objects[i];
+    Object* object = objects[i];
 
     TIMER_START(transformTimer);
 
     glm_perspective_default(1.0, projection);
     glm_translate_make(translation, object->translation);
     glm_euler(object->rotation, rotation);
+    glm_lookat(camera.eye, camera.center, camera.up, view);
 
-    mat4* matrices[] = {&projection, &translation, &rotation};
-    glm_mat4_mulN(matrices, 3, matrix);
+    mat4* matrices[] = {&projection, &view, &translation, &rotation};
+    glm_mat4_mulN(matrices, 4, matrix);
 
     for (int i = 0; i < object->mesh->vertexCount; i++) {
       vec4 vertex, transformed;

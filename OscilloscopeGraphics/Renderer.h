@@ -30,12 +30,9 @@ class Renderer {
     analogWriteResolution(resolution);
     maxValue = pow(2, resolution) - 1;
 
-    // Initialize DAC manually if not using analogWrite
-    if (writeMode == DACWriteMode::INLINE ||
-        writeMode == DACWriteMode::DIRECT) {
-      analogWrite(xPin, 0);
-      analogWrite(yPin, 0);
-    }
+    // Initialize DAC manually (needed by direct write modes)
+    analogWrite(xPin, 0);
+    analogWrite(yPin, 0);
   }
   void setWriteMode(DACWriteMode mode);
   void plot(float x, float y);

@@ -29,26 +29,37 @@ osc::Edge edges[] = {
 osc::Mesh mesh = {
   8, 12, vertices, edges
 };
-osc::Object objects[] = {
-  &mesh, &mesh, &mesh, &mesh
-};
+int objectCount = 8;
+osc::Object **objects;
+osc::Camera camera;
 
 void setup() {
   engine.getRenderer()->setWriteMode(osc::Renderer::DACWriteMode::INLINE);
+
+  objects = new osc::Object*[objectCount];
+  for (int i = 0; i < objectCount; i++) {
+    objects[i] = new osc::Object(&mesh);
+  }
+  camera.setCenter(0, 0, 0);
 }
 
 float phase = 0;
 void loop() {
-  objects[0].setTranslation(-1, sin(phase), 1 - 5);
-  objects[1].setTranslation(1, sin(phase + 0.5), 1 - 5);
-  objects[2].setTranslation(-1, sin(phase + 1.0), -1 - 5);
-  objects[3].setTranslation(1, sin(phase + 1.5), -1 - 5);
-
-  for (int i = 0; i < 4; i++) {
-    objects[i].setRotation(0, phase, 0);
+  for (int i = 0; i < objectCount; i += 4) {
+    float y = i == 0 ? 1 : -1;
+    objects[i]->setTranslation(-1, sin(phase) * 2.0 + y, 1);
+    objects[i + 1]->setTranslation(1, sin(phase + 0.5) * 2.0 + y, 1);
+    objects[i + 2]->setTranslation(-1, sin(phase + 1.0) * 2.0 + y, -1);
+    objects[i + 3]->setTranslation(1, sin(phase + 1.5) * 2.0 + y, -1);  
   }
+
+  for (int i = 0; i < objectCount; i++) {
+    objects[i]->setRotation(0, phase, 0);
+  }
+
+  camera.setEye(sin(phase) * 5.0, 0, 5.0);
   
-  engine.render(objects, 4);
+  engine.render(objects, objectCount, camera);
 
   phase += 0.01;
 }

@@ -30,16 +30,21 @@ osc::Edge edges[] = {
 osc::Mesh mesh = {
   4, 4, vertices, edges
 };
-osc::Object object(&mesh);
+osc::Object *object;
+osc::Camera camera;
 
-void setup() {}
+void setup() {
+  object = new osc::Object(&mesh);
+  camera.setEye(0, 0, 10.0);
+  camera.setCenter(0, 0, 0);
+}
 
 float phase = 0;
 void loop() {
-  object.setRotation(0, 0, phase);
-  object.setTranslation(sin(phase), 0, -4.0);
+  object->setRotation(0, 0, phase);
+  object->setTranslation(sin(phase), 0, 0);
 
-  engine.render(&object, 1);
+  engine.render(&object, 1, camera);
 
   phase += 0.001;
 }
