@@ -13,6 +13,10 @@ class Renderer {
   enum DACWriteMode { STANDARD, INLINE, DIRECT };
 
  private:
+  struct Viewport {
+    float top, bottom, left, right;
+  };
+
   const uint32_t CLIP_INSIDE = 0;
   const uint32_t CLIP_LEFT = 1;
   const uint32_t CLIP_RIGHT = 2;
@@ -23,20 +27,24 @@ class Renderer {
   const uint8_t xPin, yPin;
   uint32_t maxValue;
   DACWriteMode writeMode;
+  Viewport viewport;
 
  public:
   Renderer(uint8_t resolution, uint8_t xPin, uint8_t yPin, DACWriteMode mode)
       : resolution(resolution), xPin(xPin), yPin(yPin), writeMode(mode) {
     analogWriteResolution(resolution);
     maxValue = pow(2, resolution) - 1;
+    viewport = {1.0, -1.0, -1.0, 1.0};
 
     // Initialize DAC manually (needed by direct write modes)
     analogWrite(xPin, 0);
     analogWrite(yPin, 0);
   }
   void setWriteMode(DACWriteMode mode);
-  void plot(float x, float y);
-  void line(float x0, float y0, float x1, float y1);
+  void setViewport(float top, float bottom, float left, float right);
+  void drawPoint(float x, float y);
+  void drawLine(float x0, float y0, float x1, float y1, bool clip = true);
+  void drawViewport();
 
  private:
   void outputLine(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1);

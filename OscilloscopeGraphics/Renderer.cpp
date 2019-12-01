@@ -1,20 +1,20 @@
 #include "Renderer.h"
 #include <Arduino.h>
 
-#define CANVAS_MIN -1.0
-#define CANVAS_MAX 1.0
-
 // Transform point from canvas space to output space
 #define transform(p) ((uint32_t)(((p * 0.5) + 0.5) * maxValue))
 
 using namespace osc;
 
-void Renderer::setWriteMode(DACWriteMode mode) {
-  writeMode = mode;
+void Renderer::setWriteMode(DACWriteMode mode) { writeMode = mode; }
+
+void Renderer::setViewport(float top, float bottom, float left, float right) {
+  viewport = {top, bottom, left, right};
 }
 
-void Renderer::plot(float x, float y) {
-  if (x < CANVAS_MIN || x > CANVAS_MAX || y < CANVAS_MIN || y > CANVAS_MAX) {
+void Renderer::drawPoint(float x, float y) {
+  if (x < viewport.left || x > viewport.right || y < viewport.bottom ||
+      y > viewport.top) {
     return;
   }
 
@@ -28,13 +28,18 @@ void Renderer::plot(float x, float y) {
  * Cohen-Sutherland line clipping algorithm implementation:
  * https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm
  */
-void Renderer::line(float x0, float y0, float x1, float y1) {
+void Renderer::drawLine(float x0, float y0, float x1, float y1, bool clip) {
   uint32_t c0 = getClipCode(x0, y0);
   uint32_t c1 = getClipCode(x1, y1);
   bool accept = false;
 
   while (true) {
-    if (!(c0 | c1)) {
+    if (!clip) {
+      // No clipping - always accept
+      accept = true;
+      break;
+
+    } else if (!(c0 | c1)) {
       // Both points inside window
       accept = true;
       break;
@@ -50,20 +55,20 @@ void Renderer::line(float x0, float y0, float x1, float y1) {
 
       if (c & CLIP_TOP) {
         // Point is above the clip window
-        x = x0 + (x1 - x0) * (CANVAS_MAX - y0) / (y1 - y0);
-        y = CANVAS_MAX;
+        x = x0 + (x1 - x0) * (viewport.top - y0) / (y1 - y0);
+        y = viewport.top;
       } else if (c & CLIP_BOTTOM) {
         // Point is below the clip window
-        x = x0 + (x1 - x0) * (CANVAS_MIN - y0) / (y1 - y0);
-        y = CANVAS_MIN;
+        x = x0 + (x1 - x0) * (viewport.bottom - y0) / (y1 - y0);
+        y = viewport.bottom;
       } else if (c & CLIP_RIGHT) {
         // Point is to the right of clip window
-        x = CANVAS_MAX;
-        y = y0 + (y1 - y0) * (CANVAS_MAX - x0) / (x1 - x0);
+        x = viewport.right;
+        y = y0 + (y1 - y0) * (viewport.right - x0) / (x1 - x0);
       } else if (c & CLIP_LEFT) {
         // Point is to the left of clip window
-        x = CANVAS_MIN;
-        y = y0 + (y1 - y0) * (CANVAS_MIN - x0) / (x1 - x0);
+        x = viewport.left;
+        y = y0 + (y1 - y0) * (viewport.left - x0) / (x1 - x0);
       }
 
       if (c == c0) {
@@ -83,17 +88,29 @@ void Renderer::line(float x0, float y0, float x1, float y1) {
   }
 }
 
+void Renderer::drawViewport() {
+  // Draw viewport
+  drawLine(-1.0, viewport.top, 1.0, viewport.top, false);
+  drawLine(-1.0, viewport.bottom, 1.0, viewport.bottom, false);
+  drawLine(viewport.left, 1.0, viewport.left, -1.0, false);
+  drawLine(viewport.right, 1.0, viewport.right, -1.0, false);
+
+  // Draw crosshair
+  drawLine(-1.0, 1.0, 1.0, -1.0, false);
+  drawLine(1.0, 1.0, -1.0, -1.0, false);
+}
+
 uint32_t Renderer::getClipCode(float x, float y) {
   uint32_t code = CLIP_INSIDE;
 
-  if (x < CANVAS_MIN) {
+  if (x < viewport.left) {
     code |= CLIP_LEFT;
-  } else if (x > CANVAS_MAX) {
+  } else if (x > viewport.right) {
     code |= CLIP_RIGHT;
   }
-  if (y < CANVAS_MIN) {
+  if (y < viewport.bottom) {
     code |= CLIP_BOTTOM;
-  } else if (y > CANVAS_MAX) {
+  } else if (y > viewport.top) {
     code |= CLIP_TOP;
   }
 

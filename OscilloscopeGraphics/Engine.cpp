@@ -54,8 +54,8 @@ void Engine::render(Object** objects, int objectCount, Camera& camera) {
     TIMER_START(renderTimer);
     for (int i = 0; i < object->mesh->edgeCount; i++) {
       Edge* edge = &object->mesh->edges[i];
-      renderer->line(projected[edge->a][0], projected[edge->a][1],
-                     projected[edge->b][0], projected[edge->b][1]);
+      renderer->drawLine(projected[edge->a][0], projected[edge->a][1],
+                         projected[edge->b][0], projected[edge->b][1]);
     }
     TIMER_STOP(renderTimer);
   }
