@@ -18,30 +18,18 @@ Drawing and animating a square (as seen in the picture above):
 
 osc::Engine engine(10, A0, A1, 4);
 
-vec3 vertices[] = {
-  { -1.0, 1.0,  0 },
-  {  1.0, 1.0,  0 },
-  {  1.0, -1.0, 0 },
-  { -1.0, -1.0, 0 }
-};
-osc::Edge edges[] = {
-  { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 0 }
-};
-osc::Mesh mesh = {
-  4, 4, vertices, edges
-};
-osc::Object *object;
+osc::Mesh *mesh = osc::MeshBuilder::createPlane(1.0);
+osc::Object *object = new osc::Object(mesh);
 osc::Camera camera;
 
 void setup() {
-  object = new osc::Object(&mesh);
-  camera.setEye(0, 0, 10.0);
+  camera.setEye(0, 0, 5.0);
   camera.setCenter(0, 0, 0);
 }
 
 float phase = 0;
 void loop() {
-  object->setRotation(0, 0, phase);
+  object->setRotation(M_PI_2, phase, 0);
   object->setTranslation(sin(phase), 0, 0);
 
   engine.render(&object, 1, camera);

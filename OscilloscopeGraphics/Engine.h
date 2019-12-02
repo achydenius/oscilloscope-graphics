@@ -3,48 +3,11 @@
 
 // #define PROFILE
 
+#include "Mesh.h"
 #include "Renderer.h"
 #include "src/cglm/include/cglm/cglm.h"
 
 namespace osc {
-struct Edge {
-  int a, b;
-};
-
-class Mesh {
- public:
-  int vertexCount;
-  int edgeCount;
-  vec3* vertices;
-  Edge* edges;
-  vec4 boundingSphere;
-
-  void calculateBoundingSphere() {
-    vec3 min = {0, 0, 0};
-    vec3 max = {0, 0, 0};
-
-    // Calculate axis-aligned bounding box
-    for (int i = 0; i < vertexCount; i++) {
-      min[0] = glm_min(min[0], vertices[i][0]);
-      max[0] = glm_max(max[0], vertices[i][0]);
-      min[1] = glm_min(min[1], vertices[i][1]);
-      max[1] = glm_max(max[1], vertices[i][1]);
-      min[2] = glm_min(min[2], vertices[i][2]);
-      max[2] = glm_max(max[2], vertices[i][2]);
-    }
-
-    // Calculate center and radius of the sphere
-    vec3 center;
-    float r = 0;
-    glm_vec3_center(min, max, center);
-    for (int i = 0; i < vertexCount; i++) {
-      r = glm_max(r, glm_vec3_distance(vertices[i], center));
-    }
-
-    glm_vec4(center, r, boundingSphere);
-  }
-};
-
 class Object {
  public:
   Mesh* mesh;
