@@ -37,6 +37,8 @@ void setup() {
   engine.getRenderer()->setWriteMode(osc::Renderer::DACWriteMode::INLINE);
   engine.getRenderer()->setViewport(0.75, -0.75, -1.0, 1.0);
 
+  mesh.calculateBoundingSphere();
+
   objects = new osc::Object*[objectCount];
   for (int i = 0; i < objectCount; i++) {
     objects[i] = new osc::Object(&mesh);
@@ -58,7 +60,7 @@ void loop() {
     objects[i]->setRotation(0, phase, 0);
   }
 
-  camera.setEye(sin(phase) * 5.0, 0, 5.0);
+  camera.setEye(sin(phase) * 5.0, 0, cos(phase * 0.25) * 5.0);
   
   engine.render(objects, objectCount, camera);
 

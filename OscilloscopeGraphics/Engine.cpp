@@ -33,7 +33,9 @@ void Engine::render(Object** objects, int objectCount, Camera& camera) {
 
     TIMER_START(transformTimer);
 
-    glm_perspective_default(1.0, projection);
+    // Calculate transformation matrix
+    glm_perspective(camera.fov, camera.aspect, camera.near, camera.far,
+                    projection);
     glm_translate_make(translation, object->translation);
     glm_euler(object->rotation, rotation);
     glm_lookat(camera.eye, camera.center, camera.up, view);
@@ -41,6 +43,16 @@ void Engine::render(Object** objects, int objectCount, Camera& camera) {
     mat4* matrices[] = {&projection, &view, &translation, &rotation};
     glm_mat4_mulN(matrices, 4, matrix);
 
+    // Cull object against near plane
+    // TODO: Check against frustum instead
+    vec3 sphereCenter;
+    glm_mat4_mulv3(matrix, object->mesh->boundingSphere, 1.0, sphereCenter);
+
+    if (sphereCenter[2] - object->mesh->boundingSphere[3] < camera.near) {
+      continue;
+    }
+
+    // Transform vertices
     for (int i = 0; i < object->mesh->vertexCount; i++) {
       vec4 vertex, transformed;
       glm_vec4(object->mesh->vertices[i], 1.0, vertex);
