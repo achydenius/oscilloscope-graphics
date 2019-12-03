@@ -22,7 +22,7 @@ Engine::Engine(int resolution, int xp, int yp, int maxVertices) {
 }
 
 void Engine::render(Object** objects, int objectCount, Camera& camera) {
-  mat4 projection, view, translation, rotation, matrix;
+  mat4 projection, view, scaling, translation, rotation, matrix;
 
 #ifdef PROFILE
   Timer transformTimer, renderTimer;
@@ -36,19 +36,23 @@ void Engine::render(Object** objects, int objectCount, Camera& camera) {
     // Calculate transformation matrix
     glm_perspective(camera.fov, camera.aspect, camera.near, camera.far,
                     projection);
+    glm_lookat(camera.eye, camera.center, camera.up, view);
+    glm_scale_make(scaling, object->scaling);
     glm_translate_make(translation, object->translation);
     glm_euler(object->rotation, rotation);
-    glm_lookat(camera.eye, camera.center, camera.up, view);
 
-    mat4* matrices[] = {&projection, &view, &translation, &rotation};
-    glm_mat4_mulN(matrices, 4, matrix);
+    mat4* matrices[] = {&projection, &view, &translation, &rotation, &scaling};
+    glm_mat4_mulN(matrices, 5, matrix);
 
     // Cull object against near plane
-    // TODO: Check against frustum instead
+    // TODO: Make this a bit cleaner?
     vec3 sphereCenter;
     glm_mat4_mulv3(matrix, object->mesh->boundingSphere, 1.0, sphereCenter);
+    float scale = glm_max(glm_max(object->scaling[0], object->scaling[1]),
+                          object->scaling[2]);
 
-    if (sphereCenter[2] - object->mesh->boundingSphere[3] < camera.near) {
+    if (sphereCenter[2] - object->mesh->boundingSphere[3] * scale <
+        camera.near) {
       continue;
     }
 

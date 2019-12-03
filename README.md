@@ -23,7 +23,7 @@ osc::Object *object = new osc::Object(mesh);
 osc::Camera camera;
 
 void setup() {
-  camera.setEye(0, 0, 5.0);
+  camera.setEye(0, 0, 4.0);
   camera.setCenter(0, 0, 0);
 }
 
@@ -31,9 +31,10 @@ float phase = 0;
 void loop() {
   object->setRotation(M_PI_2, phase, 0);
   object->setTranslation(sin(phase), 0, 0);
+  object->setScaling(sin(phase * 4.0) * 0.25 + 0.75);
 
   engine.render(&object, 1, camera);
 
-  phase += 0.001;
+  phase += 0.002;
 }
 ```

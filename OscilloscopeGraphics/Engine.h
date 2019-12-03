@@ -11,20 +11,22 @@ namespace osc {
 class Object {
  public:
   Mesh* mesh;
-  vec3 rotation, translation;
+  vec3 rotation, translation, scaling;
 
-  Object(Mesh* m) : mesh(m){};
+  Object(Mesh* m) : mesh(m) { setScaling(1.0); };
 
-  void setRotation(float x, float y, float z) {
-    rotation[0] = x;
-    rotation[1] = y;
-    rotation[2] = z;
-  }
-
+  void setRotation(float x, float y, float z) { setVector(rotation, x, y, z); }
   void setTranslation(float x, float y, float z) {
-    translation[0] = x;
-    translation[1] = y;
-    translation[2] = z;
+    setVector(translation, x, y, z);
+  }
+  void setScaling(float x, float y, float z) { setVector(scaling, x, y, z); }
+  void setScaling(float scale) { setVector(scaling, scale, scale, scale); }
+
+ private:
+  void setVector(vec3 vector, float x, float y, float z) {
+    vector[0] = x;
+    vector[1] = y;
+    vector[2] = z;
   }
 };
 

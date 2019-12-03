@@ -1,5 +1,9 @@
 #include <OscilloscopeGraphics.h>
 
+float map_float(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 osc::Engine engine(10, A0, A1, 8);
 
 int objectCount = 8;
@@ -30,10 +34,11 @@ void loop() {
 
   for (int i = 0; i < objectCount; i++) {
     objects[i]->setRotation(0, phase, 0);
+    objects[i]->setScaling(map_float(sin(phase), -1.0, 1.0, 0.5, 1.0));
   }
 
   camera.setEye(sin(phase) * 5.0, 0, cos(phase * 0.25) * 5.0);
-  
+
   engine.render(objects, objectCount, camera);
 
   // engine.getRenderer()->drawViewport();
