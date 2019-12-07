@@ -6,7 +6,7 @@ float map_float(float x, float in_min, float in_max, float out_min, float out_ma
 
 osc::Engine engine(10, A0, A1, 8);
 
-int objectCount = 8;
+int objectCount = 12;
 osc::Mesh *mesh = osc::MeshBuilder::createCube(1.0);
 osc::Object **objects;
 osc::Camera camera;
@@ -24,22 +24,35 @@ void setup() {
 
 float phase = 0;
 void loop() {
-  for (int i = 0; i < objectCount; i += 4) {
-    float y = i == 0 ? 1 : -1;
-    objects[i]->setTranslation(-1, sin(phase) * 2.0 + y, 1);
-    objects[i + 1]->setTranslation(1, sin(phase + 0.5) * 2.0 + y, 1);
-    objects[i + 2]->setTranslation(-1, sin(phase + 1.0) * 2.0 + y, -1);
-    objects[i + 3]->setTranslation(1, sin(phase + 1.5) * 2.0 + y, -1);
+  long start = millis();
+  
+  for (int i = 0, j = 0; i < objectCount; i += 4, j++) {
+    float y = (j * 3) - (objectCount / 4) + 0.5;
+    objects[i]->setTranslation(-1 + cos(phase) * 0.5, sin(phase * 0.75) * 3.0 + y, 1 + cos(phase) * 0.5);
+    objects[i + 1]->setTranslation(1 + cos(phase + 0.5) * 0.5, sin(phase * 0.75 + 0.5) * 3.0 + y, 1 + cos(phase + 0.5) * 0.5);
+    objects[i + 2]->setTranslation(-1 + cos(phase + 1.0) * 0.5, sin(phase * 0.75 + 1.0) * 3.0 + y, -1 + cos(phase + 1.0) * 0.5);
+    objects[i + 3]->setTranslation(1 + cos(phase + 1.5) * 0.5, sin(phase * 0.75 + 1.5) * 3.0 + y, -1 + cos(phase + 1.5) * 0.5);
+
+    /* objects[i]->setScaling(map_float(sin(phase), -1.0, 1.0, 0.5, 1.0));
+    objects[i + 1]->setScaling(map_float(sin(phase + 0.5), -1.0, 1.0, 0.5, 1.0));
+    objects[i + 2]->setScaling(map_float(sin(phase + 1.0), -1.0, 1.0, 0.5, 1.0));
+    objects[i + 3]->setScaling(map_float(sin(phase + 1.5), -1.0, 1.0, 0.5, 1.0)); */
   }
 
   for (int i = 0; i < objectCount; i++) {
     objects[i]->setRotation(0, phase, 0);
-    objects[i]->setScaling(map_float(sin(phase), -1.0, 1.0, 0.5, 1.0));
   }
 
   camera.setEye(sin(phase) * 5.0, 0, cos(phase * 0.25) * 5.0);
+  // camera.setEye(0, 0, 10.0);
 
   engine.render(objects, objectCount, camera);
+
+  long elapsed = millis() - start;
+
+  /* if (elapsed < 15) {
+    delay(15 - elapsed);
+  } */
 
   // engine.getRenderer()->drawViewport();
 
