@@ -53,13 +53,19 @@ class Camera {
 
 class Engine {
   int xPin, yPin;
+
+ protected:
   Renderer* renderer;
   vec2* projected;
 
  public:
   Engine(int resolution, int xPin, int yPin, int maxVertices);
-  void render(Object** objects, int objectCount, Camera& camera);
+  virtual void render(Object** objects, int objectCount, Camera& camera);
   Renderer* getRenderer();
+
+ protected:
+  void renderObjects(Object** objects, int objectCount, Camera& camera,
+                     mat4* post = 0);
 };
 }  // namespace osc
 

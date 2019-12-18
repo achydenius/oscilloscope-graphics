@@ -22,21 +22,28 @@ Engine::Engine(int resolution, int xp, int yp, int maxVertices) {
 }
 
 void Engine::render(Object** objects, int objectCount, Camera& camera) {
+  renderObjects(objects, objectCount, camera);
+}
+
+void Engine::renderObjects(Object** objects, int objectCount, Camera& camera,
+                           mat4* post) {
   mat4 projection, view, scaling, translation, rotation, matrix;
 
 #ifdef PROFILE
   Timer transformTimer, renderTimer;
 #endif
 
+  // Get view & projection matrices
+  glm_perspective(camera.fov, camera.aspect, camera.near, camera.far,
+                  projection);
+  glm_lookat(camera.eye, camera.center, camera.up, view);
+
   for (int i = 0; i < objectCount; i++) {
     Object* object = objects[i];
 
     TIMER_START(transformTimer);
 
-    // Calculate transformation matrix
-    glm_perspective(camera.fov, camera.aspect, camera.near, camera.far,
-                    projection);
-    glm_lookat(camera.eye, camera.center, camera.up, view);
+    // Calculate the final transformation matrix
     glm_scale_make(scaling, object->scaling);
     glm_translate_make(translation, object->translation);
     glm_euler(object->rotation, rotation);
@@ -54,6 +61,11 @@ void Engine::render(Object** objects, int objectCount, Camera& camera) {
     if (sphereCenter[2] - object->mesh->boundingSphere[3] * scale <
         camera.near) {
       continue;
+    }
+
+    // Apply post processing matrix if defined
+    if (post) {
+      glm_mat4_mul(*post, matrix, matrix);
     }
 
     // Transform vertices

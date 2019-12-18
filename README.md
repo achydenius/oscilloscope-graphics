@@ -38,3 +38,5 @@ void loop() {
   phase += 0.002;
 }
 ```
+
+More examples can be found in [examples/](examples/) directory.

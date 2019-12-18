@@ -11,12 +11,11 @@ class Renderer {
   // Adafruit Metro M4 (https://www.adafruit.com/product/3382) as they directly
   // access the low-level API.
   enum DACWriteMode { STANDARD, INLINE, DIRECT };
-
- private:
   struct Viewport {
     float top, bottom, left, right;
   };
 
+ private:
   const uint32_t CLIP_INSIDE = 0;
   const uint32_t CLIP_LEFT = 1;
   const uint32_t CLIP_RIGHT = 2;
@@ -41,7 +40,7 @@ class Renderer {
     analogWrite(yPin, 0);
   }
   void setWriteMode(DACWriteMode mode);
-  void setViewport(float top, float bottom, float left, float right);
+  void setViewport(Viewport& vp);
   void drawPoint(float x, float y);
   void drawLine(float x0, float y0, float x1, float y1, bool clip = true);
   void drawViewport();

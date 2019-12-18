@@ -8,9 +8,7 @@ using namespace osc;
 
 void Renderer::setWriteMode(DACWriteMode mode) { writeMode = mode; }
 
-void Renderer::setViewport(float top, float bottom, float left, float right) {
-  viewport = {top, bottom, left, right};
-}
+void Renderer::setViewport(Viewport& vp) { viewport = vp; }
 
 void Renderer::drawPoint(float x, float y) {
   if (x < viewport.left || x > viewport.right || y < viewport.bottom ||
