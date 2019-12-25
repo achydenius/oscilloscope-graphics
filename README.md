@@ -16,7 +16,7 @@ Drawing and animating a square (as seen in the picture above):
 ```cpp
 #include <OscilloscopeGraphics.h>
 
-osc::Engine engine(10, A0, A1, 4);
+osc::Engine engine(10, A0, A1);
 
 osc::Mesh *mesh = osc::MeshBuilder::createPlane(1.0);
 osc::Object *object = new osc::Object(mesh);

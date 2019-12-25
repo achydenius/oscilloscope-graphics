@@ -12,8 +12,14 @@ class Object {
  public:
   Mesh* mesh;
   vec3 rotation, translation, scaling;
+  vec2* transformed;
+  bool visible;
 
-  Object(Mesh* m) : mesh(m) { setScaling(1.0); };
+  Object(Mesh* m) : mesh(m) {
+    setScaling(1.0);
+    transformed = new vec2[mesh->vertexCount];
+  };
+  ~Object() { delete transformed; }
 
   void setRotation(float x, float y, float z) { setVector(rotation, x, y, z); }
   void setTranslation(float x, float y, float z) {
@@ -56,16 +62,17 @@ class Engine {
 
  protected:
   Renderer* renderer;
-  vec2* projected;
 
  public:
-  Engine(int resolution, int xPin, int yPin, int maxVertices);
+  Engine(int resolution, int xPin, int yPin);
+  ~Engine();
   virtual void render(Object** objects, int objectCount, Camera& camera);
   Renderer* getRenderer();
 
  protected:
-  void renderObjects(Object** objects, int objectCount, Camera& camera,
-                     mat4* post = 0);
+  void transformObject(Object& object, mat4& camera, float near,
+                       mat4* post = 0);
+  void renderObject(Object& object);
 };
 }  // namespace osc
 

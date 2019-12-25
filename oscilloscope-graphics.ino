@@ -4,7 +4,7 @@ float map_float(float x, float in_min, float in_max, float out_min, float out_ma
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-osc::Engine engine(10, A0, A1, 8);
+osc::Engine engine(10, A0, A1);
 
 int objectCount = 8;
 osc::Mesh *mesh = osc::MeshBuilder::createCube(1.0);

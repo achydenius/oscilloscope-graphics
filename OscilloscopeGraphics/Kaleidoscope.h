@@ -12,48 +12,13 @@ class Kaleidoscope : public Engine {
   Mode mode;
 
  public:
-  Kaleidoscope(int resolution, int xPin, int yPin, int maxVertices,
-               Mode mode = Mode::HORIZONTAL)
-      : Engine(resolution, xPin, yPin, maxVertices), mode(mode){};
+  Kaleidoscope(int resolution, int xPin, int yPin, Mode mode = Mode::HORIZONTAL)
+      : Engine(resolution, xPin, yPin), mode(mode){};
+  void render(Object** objects, int objectCount, Camera& camera);
 
-  void render(Object** objects, int objectCount, Camera& camera) {
-    if (mode == Mode::HORIZONTAL) {
-      Renderer::Window windows[] = {{1, -1, 0, 1}, {1, -1, -1, 0}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{-1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
-
-      for (int i = 0; i < 2; i++) {
-        renderer->setViewport(windows[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
-      }
-
-    } else if (mode == Mode::VERTICAL) {
-      Renderer::Window windows[] = {{1, 0, -1, 1}, {0, -1, -1, 1}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
-
-      for (int i = 0; i < 2; i++) {
-        renderer->setViewport(windows[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
-      }
-
-    } else if (mode == Mode::QUAD) {
-      Renderer::Window windows[] = {
-          {1, 0, 0, 1}, {0, -1, 0, 1}, {0, -1, -1, 0}, {1, 0, -1, 0}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}},
-          {{-1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}},
-          {{-1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
-
-      for (int i = 0; i < 4; i++) {
-        renderer->setViewport(windows[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
-      }
-    }
-  }
+ private:
+  void renderObjects(Object** objects, int objectCount, Camera& camera,
+                     mat4* post = 0);
 };
 }  // namespace osc
 

@@ -9,7 +9,7 @@ osc::Object **objects;
 osc::Camera camera;
 
 void setup() {
-  engine = new osc::Kaleidoscope(10, A0, A1, 8, osc::Kaleidoscope::QUAD);
+  engine = new osc::Kaleidoscope(10, A0, A1, osc::Kaleidoscope::QUAD);
   engine->getRenderer()->setWriteMode(osc::Renderer::DACWriteMode::INLINE);
 
   objects = new osc::Object *[objectCount];
