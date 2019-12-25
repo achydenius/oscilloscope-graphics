@@ -8,7 +8,7 @@ using namespace osc;
 
 void Renderer::setWriteMode(DACWriteMode mode) { writeMode = mode; }
 
-void Renderer::setViewport(Viewport& vp) { viewport = vp; }
+void Renderer::setViewport(Window& vp) { viewport = vp; }
 
 void Renderer::drawPoint(float x, float y) {
   if (x < viewport.left || x > viewport.right || y < viewport.bottom ||
@@ -21,23 +21,22 @@ void Renderer::drawPoint(float x, float y) {
 }
 
 /*
- * Clip and draw a line
+ * Clip a line
  *
  * Cohen-Sutherland line clipping algorithm implementation:
  * https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm
  */
-void Renderer::drawLine(float x0, float y0, float x1, float y1, bool clip) {
-  uint32_t c0 = getClipCode(x0, y0);
-  uint32_t c1 = getClipCode(x1, y1);
+bool Renderer::clipLine(Line* source, Line* target, Window* window) {
+  float x0 = source->x0;
+  float y0 = source->y0;
+  float x1 = source->x1;
+  float y1 = source->y1;
+  uint32_t c0 = getClipCode(x0, y0, window);
+  uint32_t c1 = getClipCode(x1, y1, window);
   bool accept = false;
 
   while (true) {
-    if (!clip) {
-      // No clipping - always accept
-      accept = true;
-      break;
-
-    } else if (!(c0 | c1)) {
+    if (!(c0 | c1)) {
       // Both points inside window
       accept = true;
       break;
@@ -53,62 +52,75 @@ void Renderer::drawLine(float x0, float y0, float x1, float y1, bool clip) {
 
       if (c & CLIP_TOP) {
         // Point is above the clip window
-        x = x0 + (x1 - x0) * (viewport.top - y0) / (y1 - y0);
-        y = viewport.top;
+        x = x0 + (x1 - x0) * (window->top - y0) / (y1 - y0);
+        y = window->top;
       } else if (c & CLIP_BOTTOM) {
         // Point is below the clip window
-        x = x0 + (x1 - x0) * (viewport.bottom - y0) / (y1 - y0);
-        y = viewport.bottom;
+        x = x0 + (x1 - x0) * (window->bottom - y0) / (y1 - y0);
+        y = window->bottom;
       } else if (c & CLIP_RIGHT) {
         // Point is to the right of clip window
-        x = viewport.right;
-        y = y0 + (y1 - y0) * (viewport.right - x0) / (x1 - x0);
+        x = window->right;
+        y = y0 + (y1 - y0) * (window->right - x0) / (x1 - x0);
       } else if (c & CLIP_LEFT) {
         // Point is to the left of clip window
-        x = viewport.left;
-        y = y0 + (y1 - y0) * (viewport.left - x0) / (x1 - x0);
+        x = window->left;
+        y = y0 + (y1 - y0) * (window->left - x0) / (x1 - x0);
       }
 
       if (c == c0) {
         x0 = x;
         y0 = y;
-        c0 = getClipCode(x0, y0);
+        c0 = getClipCode(x0, y0, window);
       } else {
         x1 = x;
         y1 = y;
-        c1 = getClipCode(x1, y1);
+        c1 = getClipCode(x1, y1, window);
       }
     }
   }
 
-  if (accept) {
-    outputLine(transform(x0), transform(y0), transform(x1), transform(y1));
+  *target = {x0, y0, x1, y1};
+  return accept;
+}
+
+void Renderer::drawLine(float x0, float y0, float x1, float y1) {
+  outputLine(transform(x0), transform(y0), transform(x1), transform(y1));
+}
+
+void Renderer::clipAndDrawLine(float x0, float y0, float x1, float y1) {
+  Line source = {x0, y0, x1, y1};
+  Line target;
+
+  if (clipLine(&source, &target, &viewport)) {
+    outputLine(transform(target.x0), transform(target.y0), transform(target.x1),
+               transform(target.y1));
   }
 }
 
 void Renderer::drawViewport() {
   // Draw viewport
-  drawLine(-1.0, viewport.top, 1.0, viewport.top, false);
-  drawLine(-1.0, viewport.bottom, 1.0, viewport.bottom, false);
-  drawLine(viewport.left, 1.0, viewport.left, -1.0, false);
-  drawLine(viewport.right, 1.0, viewport.right, -1.0, false);
+  drawLine(-1.0, viewport.top, 1.0, viewport.top);
+  drawLine(-1.0, viewport.bottom, 1.0, viewport.bottom);
+  drawLine(viewport.left, 1.0, viewport.left, -1.0);
+  drawLine(viewport.right, 1.0, viewport.right, -1.0);
 
   // Draw crosshair
-  drawLine(-1.0, 1.0, 1.0, -1.0, false);
-  drawLine(1.0, 1.0, -1.0, -1.0, false);
+  drawLine(-1.0, 1.0, 1.0, -1.0);
+  drawLine(1.0, 1.0, -1.0, -1.0);
 }
 
-uint32_t Renderer::getClipCode(float x, float y) {
+uint32_t Renderer::getClipCode(float x, float y, Window* window) {
   uint32_t code = CLIP_INSIDE;
 
-  if (x < viewport.left) {
+  if (x < window->left) {
     code |= CLIP_LEFT;
-  } else if (x > viewport.right) {
+  } else if (x > window->right) {
     code |= CLIP_RIGHT;
   }
-  if (y < viewport.bottom) {
+  if (y < window->bottom) {
     code |= CLIP_BOTTOM;
-  } else if (y > viewport.top) {
+  } else if (y > window->top) {
     code |= CLIP_TOP;
   }
 

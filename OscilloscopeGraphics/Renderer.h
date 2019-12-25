@@ -11,8 +11,13 @@ class Renderer {
   // Adafruit Metro M4 (https://www.adafruit.com/product/3382) as they directly
   // access the low-level API.
   enum DACWriteMode { STANDARD, INLINE, DIRECT };
-  struct Viewport {
+
+  struct Window {
     float top, bottom, left, right;
+  };
+
+  struct Line {
+    float x0, y0, x1, y1;
   };
 
  private:
@@ -26,7 +31,7 @@ class Renderer {
   const uint8_t xPin, yPin;
   uint32_t maxValue;
   DACWriteMode writeMode;
-  Viewport viewport;
+  Window viewport;
 
  public:
   Renderer(uint8_t resolution, uint8_t xPin, uint8_t yPin, DACWriteMode mode)
@@ -40,14 +45,16 @@ class Renderer {
     analogWrite(yPin, 0);
   }
   void setWriteMode(DACWriteMode mode);
-  void setViewport(Viewport& vp);
+  void setViewport(Window& vp);
   void drawPoint(float x, float y);
-  void drawLine(float x0, float y0, float x1, float y1, bool clip = true);
+  void drawLine(float x0, float y0, float x1, float y1);
+  bool clipLine(Line* source, Line* target, Window* window);
+  void clipAndDrawLine(float x0, float y0, float x1, float y1);
   void drawViewport();
 
  private:
+  uint32_t getClipCode(float x, float y, Window* window);
   void outputLine(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1);
-  uint32_t getClipCode(float x, float y);
   void dacWriteAnalogWrite(uint32_t x, uint32_t y);
   void dacWriteInline(uint32_t x, uint32_t y, uint32_t shift);
   void dacWriteDirect(uint32_t x, uint32_t y, uint32_t shift);

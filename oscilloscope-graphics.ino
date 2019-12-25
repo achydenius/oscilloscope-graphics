@@ -13,7 +13,7 @@ osc::Camera camera;
 
 void setup() {
   engine.getRenderer()->setWriteMode(osc::Renderer::DACWriteMode::INLINE);
-  osc::Renderer::Viewport viewport = { 0.75, -0.75, -1.0, 1.0 };
+  osc::Renderer::Window viewport = { 0.75, -0.75, -1.0, 1.0 };
   engine.getRenderer()->setViewport(viewport);
 
   objects = new osc::Object*[objectCount];

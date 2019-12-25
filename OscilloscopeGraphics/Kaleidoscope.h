@@ -18,29 +18,29 @@ class Kaleidoscope : public Engine {
 
   void render(Object** objects, int objectCount, Camera& camera) {
     if (mode == Mode::HORIZONTAL) {
-      Renderer::Viewport viewports[] = {{1, -1, 0, 1}, {1, -1, -1, 0}};
+      Renderer::Window windows[] = {{1, -1, 0, 1}, {1, -1, -1, 0}};
       mat4 matrices[] = {
           GLM_MAT4_IDENTITY_INIT,
           {{-1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
 
       for (int i = 0; i < 2; i++) {
-        renderer->setViewport(viewports[i]);
+        renderer->setViewport(windows[i]);
         renderObjects(objects, objectCount, camera, &matrices[i]);
       }
 
     } else if (mode == Mode::VERTICAL) {
-      Renderer::Viewport viewports[] = {{1, 0, -1, 1}, {0, -1, -1, 1}};
+      Renderer::Window windows[] = {{1, 0, -1, 1}, {0, -1, -1, 1}};
       mat4 matrices[] = {
           GLM_MAT4_IDENTITY_INIT,
           {{1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
 
       for (int i = 0; i < 2; i++) {
-        renderer->setViewport(viewports[i]);
+        renderer->setViewport(windows[i]);
         renderObjects(objects, objectCount, camera, &matrices[i]);
       }
 
     } else if (mode == Mode::QUAD) {
-      Renderer::Viewport viewports[] = {
+      Renderer::Window windows[] = {
           {1, 0, 0, 1}, {0, -1, 0, 1}, {0, -1, -1, 0}, {1, 0, -1, 0}};
       mat4 matrices[] = {
           GLM_MAT4_IDENTITY_INIT,
@@ -49,7 +49,7 @@ class Kaleidoscope : public Engine {
           {{-1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
 
       for (int i = 0; i < 4; i++) {
-        renderer->setViewport(viewports[i]);
+        renderer->setViewport(windows[i]);
         renderObjects(objects, objectCount, camera, &matrices[i]);
       }
     }
