@@ -2,6 +2,7 @@
 #define __KALEIDOSCOPE__
 
 #include "Engine.h"
+#include "src/cglm/include/cglm/cglm.h"
 
 namespace osc {
 class Kaleidoscope : public Engine {
@@ -9,51 +10,25 @@ class Kaleidoscope : public Engine {
   enum Mode { HORIZONTAL, VERTICAL, QUAD };
 
  private:
+  const static int clipVertexCount = 4;
+  vec3 clipVertices[clipVertexCount] = {
+      {-0.5, 0.5, 0}, {0.5, 0.5, 0}, {0.5, -0.5, 0}, {-0.5, 0.5, 0}};
+  vec3* clipNormals;
   Mode mode;
 
  public:
   Kaleidoscope(int resolution, int xPin, int yPin, int maxVertices,
                Mode mode = Mode::HORIZONTAL)
-      : Engine(resolution, xPin, yPin, maxVertices), mode(mode){};
+      : Engine(resolution, xPin, yPin, maxVertices), mode(mode) {
+    clipNormals = new vec3[clipVertexCount];
+    calculateClipNormals();
+  };
 
-  void render(Object** objects, int objectCount, Camera& camera) {
-    if (mode == Mode::HORIZONTAL) {
-      Renderer::Viewport viewports[] = {{1, -1, 0, 1}, {1, -1, -1, 0}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{-1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
+  void render(Object** objects, int objectCount, Camera& camera);
 
-      for (int i = 0; i < 2; i++) {
-        renderer->setViewport(viewports[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
-      }
-
-    } else if (mode == Mode::VERTICAL) {
-      Renderer::Viewport viewports[] = {{1, 0, -1, 1}, {0, -1, -1, 1}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
-
-      for (int i = 0; i < 2; i++) {
-        renderer->setViewport(viewports[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
-      }
-
-    } else if (mode == Mode::QUAD) {
-      Renderer::Viewport viewports[] = {
-          {1, 0, 0, 1}, {0, -1, 0, 1}, {0, -1, -1, 0}, {1, 0, -1, 0}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}},
-          {{-1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}},
-          {{-1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
-
-      for (int i = 0; i < 4; i++) {
-        renderer->setViewport(viewports[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
-      }
-    }
-  }
+ private:
+  void clipLine(float x0, float y0, float x1, float y1);
+  void calculateClipNormals();
 };
 }  // namespace osc
 
