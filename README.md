@@ -4,10 +4,15 @@ Simple vector graphics engine for Arduino and oscilloscope. Tested with [Adafrui
 
 ![Picture of oscilloscope running an example](https://raw.githubusercontent.com/achydenius/oscilloscope-graphics/master/media-lab-demo-day.jpg)
 
-## Installation
+## Library installation
 
 1. Get [cglm library](https://github.com/recp/cglm) and move it inside _src_ folder
 2. Install the Oscilloscope Graphics library by moving the _OscilloscopeGraphics_ folder to Arduino _libraries_ folder
+
+## Local development with emulator
+
+1. Install [SDL](https://www.libsdl.org/) with `brew install sdl2`
+2. Build and run with `make && ./main`
 
 ## Code example
 
