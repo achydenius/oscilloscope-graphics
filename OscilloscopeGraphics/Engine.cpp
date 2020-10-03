@@ -82,8 +82,12 @@ void Engine::renderObjects(Object** objects, int objectCount, Camera& camera,
     TIMER_START(renderTimer);
     for (int i = 0; i < object->mesh->edgeCount; i++) {
       Edge* edge = &object->mesh->edges[i];
-      renderer->drawLine(projected[edge->a][0], projected[edge->a][1],
-                         projected[edge->b][0], projected[edge->b][1]);
+      vec2 a = {projected[edge->a][0], projected[edge->a][1]};
+      vec2 b = {projected[edge->b][0], projected[edge->b][1]};
+
+      if (clipper.clipLine(a, b)) {
+        renderer->drawLine(a, b);
+      }
     }
     TIMER_STOP(renderTimer);
   }
@@ -92,4 +96,23 @@ void Engine::renderObjects(Object** objects, int objectCount, Camera& camera,
   TIMER_PRINT(renderTimer, "render");
 }
 
+void Engine::renderViewport() {
+  Viewport* viewport = clipper.getViewport();
+
+  vec2 lines[][2] = {// Viewport
+                     {-1.0, viewport->top, 1.0, viewport->top},
+                     {-1.0, viewport->bottom, 1.0, viewport->bottom},
+                     {viewport->left, 1.0, viewport->left, -1.0},
+                     {viewport->right, 1.0, viewport->right, -1.0},
+                     // Crosshair
+                     {-1.0, 1.0, 1.0, -1.0},
+                     {1.0, 1.0, -1.0, -1.0}};
+
+  for (int i = 0; i < 6; i++) {
+    renderer->drawLine(lines[i][0], lines[i][1]);
+  }
+}
+
 Renderer* Engine::getRenderer() { return renderer; }
+
+Clipper* Engine::getClipper() { return &clipper; }
