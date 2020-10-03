@@ -1,5 +1,7 @@
 #include "Engine.h"
 
+#include "Mesh.h"
+
 #ifdef PROFILE
 #include "Timer.h"
 #define TIMER_START(timer) timer.start()
@@ -13,13 +15,7 @@
 
 using namespace osc;
 
-Engine::Engine(int resolution, int xp, int yp, int maxVertices) {
-  xPin = xp;
-  yPin = yp;
-  renderer =
-      new Renderer(resolution, xPin, yPin, Renderer::DACWriteMode::STANDARD);
-  projected = new vec2[maxVertices];
-}
+Engine::~Engine() { delete projected; }
 
 void Engine::render(Object** objects, int objectCount, Camera& camera) {
   renderObjects(objects, objectCount, camera);
