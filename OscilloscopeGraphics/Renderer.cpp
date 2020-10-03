@@ -5,7 +5,7 @@
 
 using namespace osc;
 
-void Renderer::setWriteMode(DACWriteMode mode) { writeMode = mode; }
+void ArduinoRenderer::setWriteMode(DACWriteMode mode) { writeMode = mode; }
 
 /*
  * Draw a line
@@ -13,7 +13,7 @@ void Renderer::setWriteMode(DACWriteMode mode) { writeMode = mode; }
  * DDA line drawing algorithm implementation:
  * https://www.geeksforgeeks.org/dda-line-generation-algorithm-computer-graphics/
  */
-void Renderer::drawLine(vec2& a, vec2& b) {
+void ArduinoRenderer::drawLine(vec2& a, vec2& b) {
   int32_t x0 = transform(a[0]);
   int32_t y0 = transform(a[1]);
   int32_t x1 = transform(b[0]);
@@ -51,12 +51,13 @@ void Renderer::drawLine(vec2& a, vec2& b) {
   }
 }
 
-inline void Renderer::dacWriteAnalogWrite(uint32_t x, uint32_t y) {
+inline void ArduinoRenderer::dacWriteAnalogWrite(uint32_t x, uint32_t y) {
   analogWrite(xPin, x);
   analogWrite(yPin, y);
 }
 
-inline void Renderer::dacWriteInline(uint32_t x, uint32_t y, uint32_t shift) {
+inline void ArduinoRenderer::dacWriteInline(uint32_t x, uint32_t y,
+                                            uint32_t shift) {
   while (!DAC->STATUS.bit.READY0)
     ;
   while (DAC->SYNCBUSY.bit.DATA0)
@@ -69,7 +70,8 @@ inline void Renderer::dacWriteInline(uint32_t x, uint32_t y, uint32_t shift) {
     ;
   DAC->DATA[1].reg = y << shift;
 }
-inline void Renderer::dacWriteDirect(uint32_t x, uint32_t y, uint32_t shift) {
+inline void ArduinoRenderer::dacWriteDirect(uint32_t x, uint32_t y,
+                                            uint32_t shift) {
   DAC->DATA[0].reg = x << shift;
   DAC->DATA[1].reg = y << shift;
 }

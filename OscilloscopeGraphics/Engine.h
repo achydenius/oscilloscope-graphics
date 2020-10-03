@@ -4,11 +4,13 @@
 // #define PROFILE
 
 #include "Clipper.h"
-#include "Mesh.h"
-#include "Renderer.h"
 #include "src/cglm/include/cglm/cglm.h"
 
 namespace osc {
+
+class Renderer;
+class Mesh;
+
 class Object {
  public:
   Mesh* mesh;
@@ -61,7 +63,10 @@ class Engine {
   vec2* projected;
 
  public:
-  Engine(int resolution, int xPin, int yPin, int maxVertices);
+  Engine(Renderer* renderer, int maxVertices) : renderer(renderer) {
+    projected = new vec2[maxVertices];
+  };
+  ~Engine();
   virtual void render(Object** objects, int objectCount, Camera& camera);
   void renderViewport();
   Renderer* getRenderer();

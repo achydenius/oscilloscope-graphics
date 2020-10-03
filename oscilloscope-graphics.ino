@@ -1,10 +1,13 @@
 #include <OscilloscopeGraphics.h>
 
-float map_float(float x, float in_min, float in_max, float out_min, float out_max) {
+float map_float(float x, float in_min, float in_max, float out_min,
+                float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-osc::Engine engine(10, A0, A1, 8);
+osc::ArduinoRenderer renderer(10, A0, A1,
+                              osc::ArduinoRenderer::DACWriteMode::INLINE);
+osc::Engine engine(&renderer, 8);
 
 int objectCount = 8;
 osc::Mesh *mesh = osc::MeshBuilder::createCube(1.0);
@@ -12,11 +15,10 @@ osc::Object **objects;
 osc::Camera camera;
 
 void setup() {
-  engine.getRenderer()->setWriteMode(osc::Renderer::DACWriteMode::INLINE);
-  osc::Renderer::Viewport viewport = { 0.75, -0.75, -1.0, 1.0 };
-  engine.getRenderer()->setViewport(viewport);
+  osc::Viewport viewport = {0.75, -0.75, -1.0, 1.0};
+  engine.getClipper()->setViewport(viewport);
 
-  objects = new osc::Object*[objectCount];
+  objects = new osc::Object *[objectCount];
   for (int i = 0; i < objectCount; i++) {
     objects[i] = new osc::Object(mesh);
   }
@@ -42,7 +44,7 @@ void loop() {
 
   engine.render(objects, objectCount, camera);
 
-  // engine.getRenderer()->drawViewport();
+  // engine.renderViewport();
 
   phase += 0.01;
 }

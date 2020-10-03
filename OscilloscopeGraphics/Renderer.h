@@ -2,12 +2,16 @@
 #define __RENDERER__
 
 #include <Arduino.h>
-#include <math.h>
 
 #include "src/cglm/include/cglm/cglm.h"
 
 namespace osc {
 class Renderer {
+ public:
+  virtual void drawLine(vec2& a, vec2& b) = 0;
+};
+
+class ArduinoRenderer : public Renderer {
  public:
   // INLINE and DIRECT write modes work only with SAMD51 based boards such as
   // Adafruit Metro M4 (https://www.adafruit.com/product/3382) as they directly
@@ -21,7 +25,8 @@ class Renderer {
   DACWriteMode writeMode;
 
  public:
-  Renderer(uint8_t resolution, uint8_t xPin, uint8_t yPin, DACWriteMode mode)
+  ArduinoRenderer(uint8_t resolution, uint8_t xPin, uint8_t yPin,
+                  DACWriteMode mode = DACWriteMode::STANDARD)
       : resolution(resolution), xPin(xPin), yPin(yPin), writeMode(mode) {
     analogWriteResolution(resolution);
     maxValue = pow(2, resolution) - 1;
