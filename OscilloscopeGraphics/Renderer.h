@@ -8,6 +8,7 @@
 namespace osc {
 class Renderer {
  public:
+  virtual unsigned long getMicroseconds() = 0;
   virtual void drawLine(vec2& a, vec2& b) = 0;
 };
 
@@ -36,6 +37,7 @@ class ArduinoRenderer : public Renderer {
     analogWrite(yPin, 0);
   }
   void setWriteMode(DACWriteMode mode);
+  unsigned long getMicroseconds();
   void drawLine(vec2& a, vec2& b);
 
  private:

@@ -1,5 +1,7 @@
 #include "Engine.h"
 
+#include <Arduino.h>
+
 #include "Mesh.h"
 
 #ifdef PROFILE
@@ -20,12 +22,17 @@ void Engine::render(Object** objects, int objectCount, Camera& camera) {
   Timer transformTimer, renderTimer;
 #endif
 
+  frameStartMicros = renderer->getMicroseconds();
+
   TIMER_START(transformTimer);
   transformObjects(objects, objectCount, camera);
   TIMER_STOP(transformTimer);
 
   TIMER_START(renderTimer);
-  renderObjects(objects, objectCount);
+  bool shouldRender;
+  do {
+    shouldRender = renderObjects(objects, objectCount);
+  } while (shouldRender);
   TIMER_STOP(renderTimer);
 
   TIMER_PRINT(transformTimer, "transform");
@@ -78,7 +85,7 @@ void Engine::transformObjects(Object** objects, int objectCount,
   }
 }
 
-void Engine::renderObjects(Object** objects, int objectCount) {
+bool Engine::renderObjects(Object** objects, int objectCount) {
   for (int i = 0; i < objectCount; i++) {
     Object* object = objects[i];
 
@@ -91,9 +98,14 @@ void Engine::renderObjects(Object** objects, int objectCount) {
         if (clipper.clipLine(a, b)) {
           renderer->drawLine(a, b);
         }
+
+        if (renderer->getMicroseconds() - frameStartMicros > microsPerFrame) {
+          return false;
+        }
       }
     }
   }
+  return true;
 }
 
 void Engine::renderViewport() {

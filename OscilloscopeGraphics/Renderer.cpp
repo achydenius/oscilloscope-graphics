@@ -7,6 +7,8 @@ using namespace osc;
 
 void ArduinoRenderer::setWriteMode(DACWriteMode mode) { writeMode = mode; }
 
+inline unsigned long ArduinoRenderer::getMicroseconds() { return micros(); }
+
 /*
  * Draw a line
  *

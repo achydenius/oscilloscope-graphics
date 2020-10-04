@@ -7,6 +7,8 @@
 #include "Mesh.h"
 #include "src/cglm/include/cglm/cglm.h"
 
+#define MICROSECONDS_PER_SECOND 1000000
+
 namespace osc {
 
 class Renderer;
@@ -64,9 +66,13 @@ class Camera {
 class Engine {
   Renderer* renderer;
   Clipper clipper;
+  unsigned long microsPerFrame;
+  unsigned long frameStartMicros;
 
  public:
-  Engine(Renderer* renderer) : renderer(renderer){};
+  Engine(Renderer* renderer, int fps) : renderer(renderer) {
+    microsPerFrame = MICROSECONDS_PER_SECOND / fps;
+  };
   void render(Object** objects, int objectCount, Camera& camera);
   void renderViewport();
   Renderer* getRenderer();
@@ -74,7 +80,7 @@ class Engine {
 
  private:
   void transformObjects(Object** objects, int objectCount, Camera& camera);
-  void renderObjects(Object** objects, int objectCount);
+  bool renderObjects(Object** objects, int objectCount);
 };
 }  // namespace osc
 
