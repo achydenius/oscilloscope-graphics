@@ -28,6 +28,10 @@ void Engine::render(Object** objects, int objectCount, Camera& camera) {
   renderObjects(objects, objectCount);
   TIMER_STOP(renderTimer);
 
+  // Move oscilloscope beam to blanking point (i.e. outside screen) when
+  // finished drawing
+  renderer->drawPoint(blankingPoint);
+
   TIMER_PRINT(transformTimer, "transform");
   TIMER_PRINT(renderTimer, "render");
 }

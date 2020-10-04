@@ -1,11 +1,22 @@
 #include "Renderer.h"
 
-// Transform point from canvas space to output space
-#define transform(p) ((uint32_t)(((p * 0.5) + 0.5) * maxValue))
-
 using namespace osc;
 
 void ArduinoRenderer::setWriteMode(DACWriteMode mode) { writeMode = mode; }
+
+void ArduinoRenderer::drawPoint(vec2& v) {
+  int32_t x = transform(v[0]);
+  int32_t y = transform(v[1]);
+  uint32_t shift = 12 - resolution;
+
+  if (writeMode == DACWriteMode::INLINE) {
+    dacWriteInline(x, y, shift);
+  } else if (writeMode == DACWriteMode::DIRECT) {
+    dacWriteDirect(x, y, shift);
+  } else {
+    dacWriteAnalogWrite(x, y);
+  }
+}
 
 /*
  * Draw a line
@@ -49,6 +60,11 @@ void ArduinoRenderer::drawLine(vec2& a, vec2& b) {
       y += iy;
     }
   }
+}
+
+// Transform value from canvas space to output space
+inline uint32_t ArduinoRenderer::transform(float value) {
+  return (uint32_t)(((value * 0.5) + 0.5) * maxValue);
 }
 
 inline void ArduinoRenderer::dacWriteAnalogWrite(uint32_t x, uint32_t y) {

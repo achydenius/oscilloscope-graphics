@@ -64,9 +64,15 @@ class Camera {
 class Engine {
   Renderer* renderer;
   Clipper clipper;
+  vec2 blankingPoint = {1.0, 1.0};
 
  public:
-  Engine(Renderer* renderer) : renderer(renderer){};
+  Engine(Renderer* renderer, vec2 bp = 0) : renderer(renderer) {
+    if (bp != 0) {
+      blankingPoint[0] = bp[0];
+      blankingPoint[1] = bp[1];
+    }
+  };
   void render(Object** objects, int objectCount, Camera& camera);
   void renderViewport();
   Renderer* getRenderer();
