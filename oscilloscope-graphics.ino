@@ -7,7 +7,7 @@ float map_float(float x, float in_min, float in_max, float out_min,
 
 osc::ArduinoRenderer renderer(10, A0, A1,
                               osc::ArduinoRenderer::DACWriteMode::INLINE);
-osc::Engine engine(&renderer, 8);
+osc::Engine engine(&renderer);
 
 int objectCount = 8;
 osc::Mesh *mesh = osc::MeshBuilder::createCube(1.0);

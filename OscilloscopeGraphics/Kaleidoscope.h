@@ -3,6 +3,7 @@
 
 #include "Engine.h"
 
+// TODO: Needs fixing due to engine refactoring
 namespace osc {
 class Kaleidoscope : public Engine {
  public:

@@ -17,7 +17,7 @@ Drawing and animating a simple square:
 #include <OscilloscopeGraphics.h>
 
 osc::ArduinoRenderer renderer(10, A0, A1);
-osc::Engine engine(&renderer, 4);
+osc::Engine engine(&renderer);
 
 osc::Mesh *mesh = osc::MeshBuilder::createPlane(1.0);
 osc::Object *object = new osc::Object(mesh);

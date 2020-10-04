@@ -15,19 +15,26 @@
 
 using namespace osc;
 
-Engine::~Engine() { delete projected; }
-
 void Engine::render(Object** objects, int objectCount, Camera& camera) {
-  renderObjects(objects, objectCount, camera);
-}
-
-void Engine::renderObjects(Object** objects, int objectCount, Camera& camera,
-                           mat4* post) {
-  mat4 projection, view, scaling, translation, rotation, matrix;
-
 #ifdef PROFILE
   Timer transformTimer, renderTimer;
 #endif
+
+  TIMER_START(transformTimer);
+  transformObjects(objects, objectCount, camera);
+  TIMER_STOP(transformTimer);
+
+  TIMER_START(renderTimer);
+  renderObjects(objects, objectCount);
+  TIMER_STOP(renderTimer);
+
+  TIMER_PRINT(transformTimer, "transform");
+  TIMER_PRINT(renderTimer, "render");
+}
+
+void Engine::transformObjects(Object** objects, int objectCount,
+                              Camera& camera) {
+  mat4 projection, view, scaling, translation, rotation, matrix;
 
   // Get view & projection matrices
   glm_perspective(camera.fov, camera.aspect, camera.near, camera.far,
@@ -36,8 +43,6 @@ void Engine::renderObjects(Object** objects, int objectCount, Camera& camera,
 
   for (int i = 0; i < objectCount; i++) {
     Object* object = objects[i];
-
-    TIMER_START(transformTimer);
 
     // Calculate the final transformation matrix
     glm_scale_make(scaling, object->scaling);
@@ -54,42 +59,41 @@ void Engine::renderObjects(Object** objects, int objectCount, Camera& camera,
     float scale = glm_max(glm_max(object->scaling[0], object->scaling[1]),
                           object->scaling[2]);
 
-    if (sphereCenter[2] - object->mesh->boundingSphere[3] * scale <
+    if (sphereCenter[2] - object->mesh->boundingSphere[3] * scale >=
         camera.near) {
-      continue;
+      object->isVisible = true;
+
+      // Transform vertices
+      for (int i = 0; i < object->mesh->vertexCount; i++) {
+        vec4 vertex, transformed;
+        glm_vec4(object->mesh->vertices[i], 1.0, vertex);
+        glm_mat4_mulv(matrix, vertex, transformed);
+
+        object->projected[i][0] = transformed[0] / transformed[3];
+        object->projected[i][1] = transformed[1] / transformed[3];
+      }
+    } else {
+      object->isVisible = false;
     }
+  }
+}
 
-    // Apply post processing matrix if defined
-    if (post) {
-      glm_mat4_mul(*post, matrix, matrix);
-    }
+void Engine::renderObjects(Object** objects, int objectCount) {
+  for (int i = 0; i < objectCount; i++) {
+    Object* object = objects[i];
 
-    // Transform vertices
-    for (int i = 0; i < object->mesh->vertexCount; i++) {
-      vec4 vertex, transformed;
-      glm_vec4(object->mesh->vertices[i], 1.0, vertex);
-      glm_mat4_mulv(matrix, vertex, transformed);
+    if (object->isVisible) {
+      for (int j = 0; j < object->mesh->edgeCount; j++) {
+        Edge* edge = &object->mesh->edges[j];
+        vec2 a = {object->projected[edge->a][0], object->projected[edge->a][1]};
+        vec2 b = {object->projected[edge->b][0], object->projected[edge->b][1]};
 
-      projected[i][0] = transformed[0] / transformed[3];
-      projected[i][1] = transformed[1] / transformed[3];
-    }
-    TIMER_STOP(transformTimer);
-
-    TIMER_START(renderTimer);
-    for (int i = 0; i < object->mesh->edgeCount; i++) {
-      Edge* edge = &object->mesh->edges[i];
-      vec2 a = {projected[edge->a][0], projected[edge->a][1]};
-      vec2 b = {projected[edge->b][0], projected[edge->b][1]};
-
-      if (clipper.clipLine(a, b)) {
-        renderer->drawLine(a, b);
+        if (clipper.clipLine(a, b)) {
+          renderer->drawLine(a, b);
+        }
       }
     }
-    TIMER_STOP(renderTimer);
   }
-
-  TIMER_PRINT(transformTimer, "transform");
-  TIMER_PRINT(renderTimer, "render");
 }
 
 void Engine::renderViewport() {

@@ -4,19 +4,26 @@
 // #define PROFILE
 
 #include "Clipper.h"
+#include "Mesh.h"
 #include "src/cglm/include/cglm/cglm.h"
 
 namespace osc {
 
 class Renderer;
-class Mesh;
 
 class Object {
  public:
   Mesh* mesh;
   vec3 rotation, translation, scaling;
+  vec2* projected;
+  bool isVisible;
 
-  Object(Mesh* m) : mesh(m) { setScaling(1.0); };
+  Object(Mesh* m) : mesh(m) {
+    setScaling(1.0);
+    projected = new vec2[m->vertexCount];
+  };
+
+  ~Object() { delete projected; }
 
   void setRotation(float x, float y, float z) { setVector(rotation, x, y, z); }
   void setTranslation(float x, float y, float z) {
@@ -55,26 +62,19 @@ class Camera {
 };
 
 class Engine {
-  int xPin, yPin;
-
- protected:
   Renderer* renderer;
   Clipper clipper;
-  vec2* projected;
 
  public:
-  Engine(Renderer* renderer, int maxVertices) : renderer(renderer) {
-    projected = new vec2[maxVertices];
-  };
-  ~Engine();
-  virtual void render(Object** objects, int objectCount, Camera& camera);
+  Engine(Renderer* renderer) : renderer(renderer){};
+  void render(Object** objects, int objectCount, Camera& camera);
   void renderViewport();
   Renderer* getRenderer();
   Clipper* getClipper();
 
- protected:
-  void renderObjects(Object** objects, int objectCount, Camera& camera,
-                     mat4* post = 0);
+ private:
+  void transformObjects(Object** objects, int objectCount, Camera& camera);
+  void renderObjects(Object** objects, int objectCount);
 };
 }  // namespace osc
 
