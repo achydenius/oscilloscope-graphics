@@ -64,19 +64,20 @@ class Camera {
 class Engine {
   Renderer* renderer;
   Clipper clipper;
+  ClipPolygon* viewport;
   vec2 blankingPoint = {1.0, 1.0};
+  static const int defaultViewportVertexCount = 4;
+  vec2 defaultViewportVertices[defaultViewportVertexCount] = {
+      {-1.0, 0.75}, {1.0, 0.75}, {1.0, -0.75}, {-1.0, -0.75}};
 
  public:
-  Engine(Renderer* renderer, vec2 bp = 0) : renderer(renderer) {
-    if (bp != 0) {
-      blankingPoint[0] = bp[0];
-      blankingPoint[1] = bp[1];
-    }
+  Engine(Renderer* renderer) : renderer(renderer) {
+    viewport = new ClipPolygon(defaultViewportVertices, 4);
   };
+  void setViewport(ClipPolygon* vp);
+  void setBlankingPoint(float x, float y);
   void render(Object** objects, int objectCount, Camera& camera);
   void renderViewport();
-  Renderer* getRenderer();
-  Clipper* getClipper();
 
  private:
   void transformObjects(Object** objects, int objectCount, Camera& camera);

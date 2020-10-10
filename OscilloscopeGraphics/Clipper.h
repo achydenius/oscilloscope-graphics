@@ -4,26 +4,26 @@
 #include "Renderer.h"
 
 namespace osc {
-struct Viewport {
-  float top, bottom, left, right;
+class ClipPolygon {
+ public:
+  int vertexCount;
+  vec2* vertices;
+  vec2* normals;
+
+  ClipPolygon(vec2* vertices, int vertexCount)
+      : vertices(vertices), vertexCount(vertexCount) {
+    normals = new vec2[vertexCount];
+    calculateNormals();
+  };
+  ~ClipPolygon();
+
+ private:
+  void calculateNormals();
 };
 
 class Clipper {
-  unsigned int CLIP_INSIDE = 0;
-  unsigned int CLIP_LEFT = 1;
-  unsigned int CLIP_RIGHT = 2;
-  unsigned int CLIP_BOTTOM = 4;
-  unsigned int CLIP_TOP = 8;
-  Viewport viewport;
-
  public:
-  Clipper() { viewport = {1.0, -1.0, -1.0, 1.0}; }
-  Viewport* getViewport();
-  void setViewport(Viewport& vp);
-  bool clipLine(vec2& a, vec2& b);
-
- private:
-  unsigned int getClipCode(float x, float y);
+  bool clipLine(vec2& a, vec2& b, ClipPolygon& polyggon);
 };
 }  // namespace osc
 

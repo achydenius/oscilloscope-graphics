@@ -1,83 +1,58 @@
-#include "clipper.h"
+#include "Clipper.h"
 
 using namespace osc;
 
-Viewport* Clipper::getViewport() { return &viewport; }
+ClipPolygon::~ClipPolygon() { delete normals; }
 
-void Clipper::setViewport(Viewport& vp) { viewport = vp; }
-
-unsigned int Clipper::getClipCode(float x, float y) {
-  unsigned int code = CLIP_INSIDE;
-
-  if (x < viewport.left) {
-    code |= CLIP_LEFT;
-  } else if (x > viewport.right) {
-    code |= CLIP_RIGHT;
+void ClipPolygon::calculateNormals() {
+  for (int i = 0; i < vertexCount; i++) {
+    vec2 dir;
+    glm_vec2_sub(vertices[(i + 1) % vertexCount], vertices[i], dir);
+    normals[i][0] = -dir[1];
+    normals[i][1] = dir[0];
+    glm_vec2_normalize(normals[i]);
   }
-  if (y < viewport.bottom) {
-    code |= CLIP_BOTTOM;
-  } else if (y > viewport.top) {
-    code |= CLIP_TOP;
-  }
-
-  return code;
-}
+};
 
 /*
- * Clip line against set viewport
+ * Clip line against a convex polygon
  *
- * Cohen-Sutherland line clipping algorithm implementation:
- * https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm
+ * Cyrus-Beck line clipping algorithm implementation:
+ * https://en.wikipedia.org/wiki/Cyrus%E2%80%93Beck_algorithm
  */
-bool Clipper::clipLine(vec2& a, vec2& b) {
-  char c0 = getClipCode(a[0], a[1]);
-  char c1 = getClipCode(b[0], b[1]);
-  bool accept = false;
+bool Clipper::clipLine(vec2& a, vec2& b, ClipPolygon& polygon) {
+  float tE = 0, tL = 1;
+  vec2 P1_P0, PEi;
+  glm_vec2_sub(b, a, P1_P0);
 
-  while (true) {
-    if (!(c0 | c1)) {
-      // Both points inside window
-      accept = true;
-      break;
+  for (int i = 0; i < polygon.vertexCount; i++) {
+    glm_vec2_sub(a, polygon.vertices[i], PEi);
+    float num = glm_vec2_dot(polygon.normals[i], PEi);
+    float den = glm_vec2_dot(polygon.normals[i], P1_P0);
 
-    } else if (c0 & c1) {
-      // Both points outside window
-      break;
+    if (den != 0) {
+      float t = num / -den;
 
-    } else {
-      // One or both points need to be clipped
-      char c = c0 ? c0 : c1;
-      float x, y;
-
-      if (c & CLIP_TOP) {
-        // Point is above the clip window
-        x = a[0] + (b[0] - a[0]) * (viewport.top - a[1]) / (b[1] - a[1]);
-        y = viewport.top;
-      } else if (c & CLIP_BOTTOM) {
-        // Point is below the clip window
-        x = a[0] + (b[0] - a[0]) * (viewport.bottom - a[1]) / (b[1] - a[1]);
-        y = viewport.bottom;
-      } else if (c & CLIP_RIGHT) {
-        // Point is to the right of clip window
-        x = viewport.right;
-        y = a[1] + (b[1] - a[1]) * (viewport.right - a[0]) / (b[0] - a[0]);
-      } else if (c & CLIP_LEFT) {
-        // Point is to the left of clip window
-        x = viewport.left;
-        y = a[1] + (b[1] - a[1]) * (viewport.left - a[0]) / (b[0] - a[0]);
-      }
-
-      if (c == c0) {
-        a[0] = x;
-        a[1] = y;
-        c0 = getClipCode(a[0], a[1]);
+      if (den < 0) {
+        tE = glm_max(tE, t);  // Entering
       } else {
-        b[0] = x;
-        b[1] = y;
-        c1 = getClipCode(b[0], b[1]);
+        tL = glm_min(tL, t);  // Exiting
       }
+    } else if (num > 0) {  // Parallel and outside
+      return false;
     }
   }
 
-  return accept;
+  if (tE > tL) {  // Outside
+    return false;
+  }
+
+  float x0 = a[0];
+  float y0 = a[1];
+
+  a[0] = x0 + P1_P0[0] * tE;
+  a[1] = y0 + P1_P0[1] * tE;
+  b[0] = x0 + P1_P0[0] * tL;
+  b[1] = y0 + P1_P0[1] * tL;
+  return true;
 }

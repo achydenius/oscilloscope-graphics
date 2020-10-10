@@ -15,6 +15,13 @@
 
 using namespace osc;
 
+void Engine::setViewport(ClipPolygon* vp) { viewport = vp; }
+
+void Engine::setBlankingPoint(float x, float y) {
+  blankingPoint[0] = x;
+  blankingPoint[1] = y;
+}
+
 void Engine::render(Object** objects, int objectCount, Camera& camera) {
 #ifdef PROFILE
   Timer transformTimer, renderTimer;
@@ -92,7 +99,7 @@ void Engine::renderObjects(Object** objects, int objectCount) {
         vec2 a = {object->projected[edge->a][0], object->projected[edge->a][1]};
         vec2 b = {object->projected[edge->b][0], object->projected[edge->b][1]};
 
-        if (clipper.clipLine(a, b)) {
+        if (clipper.clipLine(a, b, *viewport)) {
           renderer->drawLine(a, b);
         }
       }
@@ -101,22 +108,8 @@ void Engine::renderObjects(Object** objects, int objectCount) {
 }
 
 void Engine::renderViewport() {
-  Viewport* viewport = clipper.getViewport();
-
-  vec2 lines[][2] = {// Viewport
-                     {-1.0, viewport->top, 1.0, viewport->top},
-                     {-1.0, viewport->bottom, 1.0, viewport->bottom},
-                     {viewport->left, 1.0, viewport->left, -1.0},
-                     {viewport->right, 1.0, viewport->right, -1.0},
-                     // Crosshair
-                     {-1.0, 1.0, 1.0, -1.0},
-                     {1.0, 1.0, -1.0, -1.0}};
-
-  for (int i = 0; i < 6; i++) {
-    renderer->drawLine(lines[i][0], lines[i][1]);
+  for (int i = 0; i < viewport->vertexCount; i++) {
+    renderer->drawLine(viewport->vertices[i],
+                       viewport->vertices[(i + 1) % viewport->vertexCount]);
   }
 }
-
-Renderer* Engine::getRenderer() { return renderer; }
-
-Clipper* Engine::getClipper() { return &clipper; }
