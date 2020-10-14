@@ -15,6 +15,11 @@
 
 using namespace osc;
 
+Engine::~Engine() {
+  delete viewport;
+  delete lines;
+}
+
 void Engine::setViewport(ClipPolygon* vp) { viewport = vp; }
 
 void Engine::setBlankingPoint(float x, float y) {
@@ -24,15 +29,19 @@ void Engine::setBlankingPoint(float x, float y) {
 
 void Engine::render(Object** objects, int objectCount, Camera& camera) {
 #ifdef PROFILE
-  Timer transformTimer, renderTimer;
+  Timer transformTimer, clipTimer, renderTimer;
 #endif
 
   TIMER_START(transformTimer);
   transformObjects(objects, objectCount, camera);
   TIMER_STOP(transformTimer);
 
+  TIMER_START(clipTimer);
+  clipObjects(objects, objectCount);
+  TIMER_STOP(clipTimer);
+
   TIMER_START(renderTimer);
-  renderObjects(objects, objectCount);
+  renderLines();
   TIMER_STOP(renderTimer);
 
   // Move oscilloscope beam to blanking point (i.e. outside screen) when
@@ -89,7 +98,9 @@ void Engine::transformObjects(Object** objects, int objectCount,
   }
 }
 
-void Engine::renderObjects(Object** objects, int objectCount) {
+void Engine::clipObjects(Object** objects, int objectCount) {
+  lineCount = 0;
+
   for (int i = 0; i < objectCount; i++) {
     Object* object = objects[i];
 
@@ -100,10 +111,18 @@ void Engine::renderObjects(Object** objects, int objectCount) {
         vec2 b = {object->projected[edge->b][0], object->projected[edge->b][1]};
 
         if (clipper.clipLine(a, b, *viewport)) {
-          renderer->drawLine(a, b);
+          glm_vec2_copy(a, lines[lineCount].a);
+          glm_vec2_copy(b, lines[lineCount].b);
+          lineCount++;
         }
       }
     }
+  }
+}
+
+void Engine::renderLines() {
+  for (int i = 0; i < lineCount; i++) {
+    renderer->drawLine(lines[i].a, lines[i].b);
   }
 }
 

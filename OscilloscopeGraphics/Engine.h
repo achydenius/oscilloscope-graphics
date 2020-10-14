@@ -11,6 +11,10 @@ namespace osc {
 
 class Renderer;
 
+struct Line {
+  vec2 a, b;
+};
+
 class Object {
  public:
   Mesh* mesh;
@@ -69,11 +73,17 @@ class Engine {
   static const int defaultViewportVertexCount = 4;
   vec2 defaultViewportVertices[defaultViewportVertexCount] = {
       {-1.0, 0.75}, {1.0, 0.75}, {1.0, -0.75}, {-1.0, -0.75}};
+  Line* lines;
+  int lineCount;
+  int maxLines;
 
  public:
-  Engine(Renderer* renderer) : renderer(renderer) {
+  Engine(Renderer* renderer, int maxLines = 1000)
+      : renderer(renderer), maxLines(maxLines) {
     viewport = new ClipPolygon(defaultViewportVertices, 4);
+    lines = new Line[maxLines];
   };
+  ~Engine();
   void setViewport(ClipPolygon* vp);
   void setBlankingPoint(float x, float y);
   void render(Object** objects, int objectCount, Camera& camera);
@@ -81,7 +91,8 @@ class Engine {
 
  private:
   void transformObjects(Object** objects, int objectCount, Camera& camera);
-  void renderObjects(Object** objects, int objectCount);
+  void clipObjects(Object** objects, int objectCount);
+  void renderLines();
 };
 }  // namespace osc
 
