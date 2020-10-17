@@ -3,6 +3,9 @@
 
 // #define PROFILE
 
+#include <algorithm>
+#include <initializer_list>
+
 #include "Clipper.h"
 #include "Mesh.h"
 #include "src/cglm/include/cglm/cglm.h"
@@ -13,6 +16,20 @@ class Renderer;
 
 struct Line {
   vec2 a, b;
+};
+
+template <typename T>
+class Array {
+  T* data;
+  size_t size;
+
+ public:
+  Array(size_t size) : size(size) { data = new T[size]; }
+  Array(std::initializer_list<T> il) : Array(il.size()) {
+    std::copy(il.begin(), il.end(), data);
+  }
+  T& operator[](int index) { return data[index]; }
+  size_t getSize() { return size; }
 };
 
 class Object {
@@ -66,7 +83,7 @@ class Camera {
 };
 
 class Engine {
-  Renderer* renderer;
+  Renderer& renderer;
   Clipper clipper;
   ClipPolygon* viewport;
   vec2 blankingPoint = {1.0, 1.0};
@@ -78,7 +95,7 @@ class Engine {
   int maxLines;
 
  public:
-  Engine(Renderer* renderer, int maxLines = 1000)
+  Engine(Renderer& renderer, int maxLines = 1000)
       : renderer(renderer), maxLines(maxLines) {
     viewport = new ClipPolygon(defaultViewportVertices, 4);
     lines = new Line[maxLines];
@@ -86,12 +103,12 @@ class Engine {
   ~Engine();
   void setViewport(ClipPolygon* vp);
   void setBlankingPoint(float x, float y);
-  void render(Object** objects, int objectCount, Camera& camera);
+  void render(Array<Object*> objects, Camera& camera);
   void renderViewport();
 
  private:
-  void transformObjects(Object** objects, int objectCount, Camera& camera);
-  void clipObjects(Object** objects, int objectCount);
+  void transformObjects(Array<Object*> objects, Camera& camera);
+  void clipObjects(Array<Object*> objects);
   void renderLines();
 };
 }  // namespace osc

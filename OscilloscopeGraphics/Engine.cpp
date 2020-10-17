@@ -27,17 +27,17 @@ void Engine::setBlankingPoint(float x, float y) {
   blankingPoint[1] = y;
 }
 
-void Engine::render(Object** objects, int objectCount, Camera& camera) {
+void Engine::render(Array<Object*> objects, Camera& camera) {
 #ifdef PROFILE
   Timer transformTimer, clipTimer, renderTimer;
 #endif
 
   TIMER_START(transformTimer);
-  transformObjects(objects, objectCount, camera);
+  transformObjects(objects, camera);
   TIMER_STOP(transformTimer);
 
   TIMER_START(clipTimer);
-  clipObjects(objects, objectCount);
+  clipObjects(objects);
   TIMER_STOP(clipTimer);
 
   TIMER_START(renderTimer);
@@ -46,14 +46,13 @@ void Engine::render(Object** objects, int objectCount, Camera& camera) {
 
   // Move oscilloscope beam to blanking point (i.e. outside screen) when
   // finished drawing
-  renderer->drawPoint(blankingPoint);
+  renderer.drawPoint(blankingPoint);
 
   TIMER_PRINT(transformTimer, "transform");
   TIMER_PRINT(renderTimer, "render");
 }
 
-void Engine::transformObjects(Object** objects, int objectCount,
-                              Camera& camera) {
+void Engine::transformObjects(Array<Object*> objects, Camera& camera) {
   mat4 projection, view, scaling, translation, rotation, matrix;
 
   // Get view & projection matrices
@@ -61,7 +60,7 @@ void Engine::transformObjects(Object** objects, int objectCount,
                   projection);
   glm_lookat(camera.eye, camera.center, camera.up, view);
 
-  for (int i = 0; i < objectCount; i++) {
+  for (int i = 0; i < objects.getSize(); i++) {
     Object* object = objects[i];
 
     // Calculate the final transformation matrix
@@ -98,10 +97,10 @@ void Engine::transformObjects(Object** objects, int objectCount,
   }
 }
 
-void Engine::clipObjects(Object** objects, int objectCount) {
+void Engine::clipObjects(Array<Object*> objects) {
   lineCount = 0;
 
-  for (int i = 0; i < objectCount; i++) {
+  for (int i = 0; i < objects.getSize(); i++) {
     Object* object = objects[i];
 
     if (object->isVisible) {
@@ -122,13 +121,13 @@ void Engine::clipObjects(Object** objects, int objectCount) {
 
 void Engine::renderLines() {
   for (int i = 0; i < lineCount; i++) {
-    renderer->drawLine(lines[i].a, lines[i].b);
+    renderer.drawLine(lines[i].a, lines[i].b);
   }
 }
 
 void Engine::renderViewport() {
   for (int i = 0; i < viewport->vertexCount; i++) {
-    renderer->drawLine(viewport->vertices[i],
-                       viewport->vertices[(i + 1) % viewport->vertexCount]);
+    renderer.drawLine(viewport->vertices[i],
+                      viewport->vertices[(i + 1) % viewport->vertexCount]);
   }
 }

@@ -17,10 +17,10 @@ Drawing and animating a simple square:
 #include <OscilloscopeGraphics.h>
 
 osc::ArduinoRenderer renderer(10, A0, A1);
-osc::Engine engine(&renderer);
+osc::Engine engine(renderer);
 
 osc::Mesh *mesh = osc::MeshBuilder::createPlane(1.0);
-osc::Object *object = new osc::Object(mesh);
+osc::Array<osc::Object*> objects({ new osc::Object(mesh) });
 osc::Camera camera;
 
 void setup() {
@@ -30,11 +30,11 @@ void setup() {
 
 float phase = 0;
 void loop() {
-  object->setRotation(M_PI_2, phase, 0);
-  object->setTranslation(sin(phase), 0, 0);
-  object->setScaling(sin(phase * 4.0) * 0.25 + 0.75);
+  objects[0]->setRotation(M_PI_2, phase, 0);
+  objects[0]->setTranslation(sin(phase), 0, 0);
+  objects[0]->setScaling(sin(phase * 4.0) * 0.25 + 0.75);
 
-  engine.render(&object, 1, camera);
+  engine.render(objects, camera);
 
   phase += 0.002;
 }

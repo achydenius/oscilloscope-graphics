@@ -7,18 +7,17 @@ float map_float(float x, float in_min, float in_max, float out_min,
 
 osc::ArduinoRenderer renderer(10, A0, A1,
                               osc::ArduinoRenderer::DACWriteMode::INLINE);
-osc::Engine engine(&renderer);
+osc::Engine engine(renderer);
 
 int objectCount = 8;
 osc::Mesh *mesh = osc::MeshBuilder::createCube(1.0);
-osc::Object **objects;
+osc::Array<osc::Object *> objects(objectCount);
 osc::Camera camera;
+vec2 viewportVertices[] = {{-1.0, 0.5}, {1.0, 0.5}, {1.0, -0.5}, {-1.0, -0.5}};
 
 void setup() {
-  osc::Viewport viewport = {0.75, -0.75, -1.0, 1.0};
-  engine.getClipper()->setViewport(viewport);
+  engine.setViewport(new osc::ClipPolygon(viewportVertices, 4));
 
-  objects = new osc::Object *[objectCount];
   for (int i = 0; i < objectCount; i++) {
     objects[i] = new osc::Object(mesh);
   }
@@ -42,7 +41,7 @@ void loop() {
 
   camera.setEye(sin(phase) * 5.0, 0, cos(phase * 0.25) * 5.0);
 
-  engine.render(objects, objectCount, camera);
+  engine.render(objects, camera);
 
   // engine.renderViewport();
 
