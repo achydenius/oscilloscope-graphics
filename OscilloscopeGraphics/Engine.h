@@ -20,6 +20,7 @@ struct Line {
 
 template <typename T>
 class Array {
+ protected:
   T* data;
   size_t size;
 
@@ -28,8 +29,22 @@ class Array {
   Array(std::initializer_list<T> il) : Array(il.size()) {
     std::copy(il.begin(), il.end(), data);
   }
+
   T& operator[](int index) { return data[index]; }
   size_t getSize() { return size; }
+};
+
+template <typename T>
+class Buffer : public Array<T> {
+  int index;
+
+ public:
+  Buffer(size_t size) : Array<T>(size){};
+
+  T& operator[](int index) { return Array<T>::data[index]; }
+  int count() { return index; }
+  void reset() { index = 0; }
+  void add(T d) { Array<T>::data[index++] = d; }
 };
 
 class Object {
@@ -37,7 +52,6 @@ class Object {
   Mesh* mesh;
   vec3 rotation, translation, scaling;
   vec2* projected;
-  bool isVisible;
 
   Object(Mesh* m) : mesh(m) {
     setScaling(1.0);
@@ -86,30 +100,32 @@ class Engine {
   Renderer& renderer;
   Clipper clipper;
   ClipPolygon* viewport;
+
   vec2 blankingPoint = {1.0, 1.0};
   static const int defaultViewportVertexCount = 4;
   vec2 defaultViewportVertices[defaultViewportVertexCount] = {
       {-1.0, 0.75}, {1.0, 0.75}, {1.0, -0.75}, {-1.0, -0.75}};
-  Line* lines;
-  int lineCount;
-  int maxLines;
+
+  Buffer<Object*> transformedObjects;
+  Buffer<Line> clippedLines;
 
  public:
-  Engine(Renderer& renderer, int maxLines = 1000)
-      : renderer(renderer), maxLines(maxLines) {
+  Engine(Renderer& renderer, int maxObjects = 1000, int maxLines = 1000)
+      : renderer(renderer),
+        transformedObjects(maxObjects),
+        clippedLines(maxLines) {
     viewport = new ClipPolygon(defaultViewportVertices, 4);
-    lines = new Line[maxLines];
   };
   ~Engine();
   void setViewport(ClipPolygon* vp);
   void setBlankingPoint(float x, float y);
-  void render(Array<Object*> objects, Camera& camera);
+  void render(Array<Object*>& objects, Camera& camera);
   void renderViewport();
 
  private:
-  void transformObjects(Array<Object*> objects, Camera& camera);
-  void clipObjects(Array<Object*> objects);
-  void renderLines();
+  Buffer<Object*>& transformObjects(Array<Object*>& objects, Camera& camera);
+  Buffer<Line>& clipObjects(Buffer<Object*>& objects);
+  void renderLines(Buffer<Line>& lines);
 };
 }  // namespace osc
 

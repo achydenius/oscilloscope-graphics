@@ -15,10 +15,7 @@
 
 using namespace osc;
 
-Engine::~Engine() {
-  delete viewport;
-  delete lines;
-}
+Engine::~Engine() { delete viewport; }
 
 void Engine::setViewport(ClipPolygon* vp) { viewport = vp; }
 
@@ -27,21 +24,21 @@ void Engine::setBlankingPoint(float x, float y) {
   blankingPoint[1] = y;
 }
 
-void Engine::render(Array<Object*> objects, Camera& camera) {
+void Engine::render(Array<Object*>& objects, Camera& camera) {
 #ifdef PROFILE
   Timer transformTimer, clipTimer, renderTimer;
 #endif
 
   TIMER_START(transformTimer);
-  transformObjects(objects, camera);
+  Buffer<Object*>& transformed = transformObjects(objects, camera);
   TIMER_STOP(transformTimer);
 
   TIMER_START(clipTimer);
-  clipObjects(objects);
+  Buffer<Line>& clipped = clipObjects(transformed);
   TIMER_STOP(clipTimer);
 
   TIMER_START(renderTimer);
-  renderLines();
+  renderLines(clipped);
   TIMER_STOP(renderTimer);
 
   // Move oscilloscope beam to blanking point (i.e. outside screen) when
@@ -52,7 +49,8 @@ void Engine::render(Array<Object*> objects, Camera& camera) {
   TIMER_PRINT(renderTimer, "render");
 }
 
-void Engine::transformObjects(Array<Object*> objects, Camera& camera) {
+Buffer<Object*>& Engine::transformObjects(Array<Object*>& objects,
+                                          Camera& camera) {
   mat4 projection, view, scaling, translation, rotation, matrix;
 
   // Get view & projection matrices
@@ -60,6 +58,7 @@ void Engine::transformObjects(Array<Object*> objects, Camera& camera) {
                   projection);
   glm_lookat(camera.eye, camera.center, camera.up, view);
 
+  transformedObjects.reset();
   for (int i = 0; i < objects.getSize(); i++) {
     Object* object = objects[i];
 
@@ -80,8 +79,6 @@ void Engine::transformObjects(Array<Object*> objects, Camera& camera) {
 
     if (sphereCenter[2] - object->mesh->boundingSphere[3] * scale >=
         camera.near) {
-      object->isVisible = true;
-
       // Transform vertices
       for (int i = 0; i < object->mesh->vertexCount; i++) {
         vec4 vertex, transformed;
@@ -91,36 +88,35 @@ void Engine::transformObjects(Array<Object*> objects, Camera& camera) {
         object->projected[i][0] = transformed[0] / transformed[3];
         object->projected[i][1] = transformed[1] / transformed[3];
       }
-    } else {
-      object->isVisible = false;
+      transformedObjects.add(object);
     }
   }
+  return transformedObjects;
 }
 
-void Engine::clipObjects(Array<Object*> objects) {
-  lineCount = 0;
-
-  for (int i = 0; i < objects.getSize(); i++) {
+Buffer<Line>& Engine::clipObjects(Buffer<Object*>& objects) {
+  clippedLines.reset();
+  for (int i = 0; i < objects.count(); i++) {
     Object* object = objects[i];
 
-    if (object->isVisible) {
-      for (int j = 0; j < object->mesh->edgeCount; j++) {
-        Edge* edge = &object->mesh->edges[j];
-        vec2 a = {object->projected[edge->a][0], object->projected[edge->a][1]};
-        vec2 b = {object->projected[edge->b][0], object->projected[edge->b][1]};
+    for (int j = 0; j < object->mesh->edgeCount; j++) {
+      Edge* edge = &object->mesh->edges[j];
+      vec2 a = {object->projected[edge->a][0], object->projected[edge->a][1]};
+      vec2 b = {object->projected[edge->b][0], object->projected[edge->b][1]};
 
-        if (clipper.clipLine(a, b, *viewport)) {
-          glm_vec2_copy(a, lines[lineCount].a);
-          glm_vec2_copy(b, lines[lineCount].b);
-          lineCount++;
-        }
+      if (clipper.clipLine(a, b, *viewport)) {
+        Line line;
+        glm_vec2_copy(a, line.a);
+        glm_vec2_copy(b, line.b);
+        clippedLines.add(line);
       }
     }
   }
+  return clippedLines;
 }
 
-void Engine::renderLines() {
-  for (int i = 0; i < lineCount; i++) {
+void Engine::renderLines(Buffer<Line>& lines) {
+  for (int i = 0; i < lines.count(); i++) {
     renderer.drawLine(lines[i].a, lines[i].b);
   }
 }
