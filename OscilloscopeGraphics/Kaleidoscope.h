@@ -3,56 +3,52 @@
 
 #include "Engine.h"
 
-// TODO: Needs fixing due to engine refactoring
 namespace osc {
-class Kaleidoscope : public Engine {
+class Kaleidoscope {
  public:
-  enum Mode { HORIZONTAL, VERTICAL, QUAD };
+  enum Mode { TWO, FOUR, EIGHT };
 
  private:
+  Engine engine;
   Mode mode;
+  vec2 vertices[3] = {{0, 0}, {1.0, 1.0}, {1.0, 0}};
+  ClipPolygon* poly;
+  Buffer<Line> lines;
 
  public:
-  Kaleidoscope(int resolution, int xPin, int yPin, int maxVertices,
-               Mode mode = Mode::HORIZONTAL)
-      : Engine(resolution, xPin, yPin, maxVertices), mode(mode){};
+  Kaleidoscope(Renderer& renderer, Mode mode)
+      : engine(renderer), mode(mode), lines(10000) {
+    poly = new ClipPolygon(vertices, 3);
+    engine.setViewport(poly);
+  };
 
-  void render(Object** objects, int objectCount, Camera& camera) {
-    if (mode == Mode::HORIZONTAL) {
-      Renderer::Viewport viewports[] = {{1, -1, 0, 1}, {1, -1, -1, 0}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{-1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
+  void render(Array<Object*>& objects, Camera& camera) {
+    lines.reset();
 
-      for (int i = 0; i < 2; i++) {
-        renderer->setViewport(viewports[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
-      }
+    Buffer<Object*>& transformed = engine.transformObjects(objects, camera);
+    Buffer<Line>& lines = engine.clipObjects(transformed);
 
-    } else if (mode == Mode::VERTICAL) {
-      Renderer::Viewport viewports[] = {{1, 0, -1, 1}, {0, -1, -1, 1}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
+    mat2 mirror45degrees = {{cos(GLM_PI_2f), sin(GLM_PI_2f)},
+                            {sin(GLM_PI_2f), -cos(GLM_PI_2f)}};
+    mat2 mirrorHorizontal = {{-1.0, 0}, {0, 1.0}};
+    mat2 mirrorVertical = {{1.0, 0}, {0, -1.0}};
 
-      for (int i = 0; i < 2; i++) {
-        renderer->setViewport(viewports[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
-      }
+    mirror(mirror45degrees, lines);
+    mirror(mirrorHorizontal, lines);
+    mirror(mirrorVertical, lines);
 
-    } else if (mode == Mode::QUAD) {
-      Renderer::Viewport viewports[] = {
-          {1, 0, 0, 1}, {0, -1, 0, 1}, {0, -1, -1, 0}, {1, 0, -1, 0}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}},
-          {{-1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}},
-          {{-1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
+    engine.renderLines(lines);
 
-      for (int i = 0; i < 4; i++) {
-        renderer->setViewport(viewports[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
-      }
+    vec2 blankingPoint = {1.0, 1.0};
+    engine.getRenderer().drawPoint(blankingPoint);
+  }
+
+  void mirror(mat2 matrix, Buffer<Line>& lines) {
+    for (int i = lines.count() - 1; i >= 0; i--) {
+      Line line;
+      glm_mat2_mulv(matrix, lines[i].a, line.a);
+      glm_mat2_mulv(matrix, lines[i].b, line.b);
+      lines.add(line);
     }
   }
 };

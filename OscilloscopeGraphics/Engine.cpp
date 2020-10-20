@@ -17,6 +17,8 @@ using namespace osc;
 
 Engine::~Engine() { delete viewport; }
 
+Renderer& Engine::getRenderer() { return renderer; }
+
 void Engine::setViewport(ClipPolygon* vp) { viewport = vp; }
 
 void Engine::setBlankingPoint(float x, float y) {
