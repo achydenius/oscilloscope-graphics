@@ -18,7 +18,7 @@ vec2 viewportVertices[] = {{-1.0, 0.5}, {1.0, 0.5}, {1.0, -0.5}, {-1.0, -0.5}};
 void setup() {
   engine.setViewport(new osc::ClipPolygon(viewportVertices, 4));
 
-  for (int i = 0; i < objectCount; i++) {
+  for (int i = 0; i < objects.getSize(); i++) {
     objects[i] = new osc::Object(mesh);
   }
   camera.setCenter(0, 0, 0);
@@ -26,7 +26,7 @@ void setup() {
 
 float phase = 0;
 void loop() {
-  for (int i = 0; i < objectCount; i += 4) {
+  for (int i = 0; i < objects.getSize(); i += 4) {
     float y = i == 0 ? 1 : -1;
     objects[i]->setTranslation(-1, sin(phase) * 2.0 + y, 1);
     objects[i + 1]->setTranslation(1, sin(phase + 0.5) * 2.0 + y, 1);
@@ -34,7 +34,7 @@ void loop() {
     objects[i + 3]->setTranslation(1, sin(phase + 1.5) * 2.0 + y, -1);
   }
 
-  for (int i = 0; i < objectCount; i++) {
+  for (int i = 0; i < objects.getSize(); i++) {
     objects[i]->setRotation(0, phase, 0);
     objects[i]->setScaling(map_float(sin(phase), -1.0, 1.0, 0.5, 1.0));
   }
