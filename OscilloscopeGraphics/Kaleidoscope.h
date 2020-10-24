@@ -4,19 +4,8 @@
 #include "Engine.h"
 
 namespace osc {
-class Kaleidoscope {
- public:
-  enum Mode { ONE, TWO, FOUR, EIGHT, SIXTEEN };
-
- private:
-  vec2 screenClipVertices[4] = {
-      {-1.0, 0.75}, {1.0, 0.75}, {1.0, -0.75}, {-1.0, -0.75}};
-  vec2 modeTwoClipVertices[4] = {
-      {0, 0.75}, {1.0, 0.75}, {1.0, -0.75}, {0, -0.75}};
-  vec2 modeFourClipVertices[4] = {{0, 0}, {0, 0.75}, {1.0, 0.75}, {1.0, 0}};
-  vec2 modeEightClipVertices[3] = {{0, 0}, {1.0, 1.0}, {1.0, 0}};
-  vec2 modeSixteenClipVertices[3] = {{0, 0}, {1.0, 0.5}, {1.0, 0}};
-
+class Generator {
+ protected:
   mat2 mirror22AndHalfDegrees = {{cos(GLM_PI_4f), sin(GLM_PI_4f)},
                                  {sin(GLM_PI_4f), -cos(GLM_PI_4f)}};
   mat2 mirror45Degrees = {{cos(GLM_PI_2f), sin(GLM_PI_2f)},
@@ -24,12 +13,90 @@ class Kaleidoscope {
   mat2 mirrorHorizontal = {{-1.0, 0}, {0, 1.0}};
   mat2 mirrorVertical = {{1.0, 0}, {0, -1.0}};
 
+  Engine& engine;
+
+ public:
+  Generator(Engine& engine) : engine(engine){};
+
+  Buffer<Line>& generateLines(Array<Object*>& objects, Camera& camera);
+
+  virtual ClipPolygon& getClipPolygon() = 0;
+  virtual Buffer<Line>& mirror(Buffer<Line>& lines) = 0;
+
+ protected:
+  void applyMatrix(mat2 matrix, Buffer<Line>& lines);
+};
+
+class OneGenerator : public Generator {
+  ClipPolygon clipPolygon;
+  vec2 clipVertices[4] = {
+      {-1.0, 0.75}, {1.0, 0.75}, {1.0, -0.75}, {-1.0, -0.75}};
+
+ public:
+  OneGenerator(Engine& engine)
+      : Generator(engine), clipPolygon(clipVertices, 4){};
+  ClipPolygon& getClipPolygon();
+  Buffer<Line>& mirror(Buffer<Line>& lines);
+};
+
+class TwoGenerator : public Generator {
+  ClipPolygon clipPolygon;
+  vec2 clipVertices[4] = {{0, 0.75}, {1.0, 0.75}, {1.0, -0.75}, {0, -0.75}};
+
+ public:
+  TwoGenerator(Engine& engine)
+      : Generator(engine), clipPolygon(clipVertices, 4){};
+  ClipPolygon& getClipPolygon();
+  Buffer<Line>& mirror(Buffer<Line>& lines);
+};
+
+class FourGenerator : public Generator {
+  ClipPolygon clipPolygon;
+  vec2 clipVertices[4] = {{0, 0}, {0, 0.75}, {1.0, 0.75}, {1.0, 0}};
+
+ public:
+  FourGenerator(Engine& engine)
+      : Generator(engine), clipPolygon(clipVertices, 4){};
+  ClipPolygon& getClipPolygon();
+  Buffer<Line>& mirror(Buffer<Line>& lines);
+};
+
+class EightGenerator : public Generator {
+  ClipPolygon clipPolygon;
+  vec2 clipVertices[3] = {{0, 0}, {1.0, 1.0}, {1.0, 0}};
+
+ public:
+  EightGenerator(Engine& engine)
+      : Generator(engine), clipPolygon(clipVertices, 3){};
+  ClipPolygon& getClipPolygon();
+  Buffer<Line>& mirror(Buffer<Line>& lines);
+};
+
+class SixteenGenerator : public Generator {
+  ClipPolygon clipPolygon;
+  vec2 clipVertices[3] = {{0, 0}, {1.0, 0.5}, {1.0, 0}};
+
+ public:
+  SixteenGenerator(Engine& engine)
+      : Generator(engine), clipPolygon(clipVertices, 3) {}
+  ClipPolygon& getClipPolygon();
+  Buffer<Line>& mirror(Buffer<Line>& lines);
+};
+
+class Kaleidoscope {
+ public:
+  enum Mode { ONE, TWO, FOUR, EIGHT, SIXTEEN };
+
+ private:
+  vec2 screenClipVertices[4] = {
+      {-1.0, 0.75}, {1.0, 0.75}, {1.0, -0.75}, {-1.0, -0.75}};
+
   Engine engine;
   Mode mode;
-  ClipPolygon* clipPolygon;
   Buffer<Line> clippedLines;
   Clipper clipper;
   ClipPolygon screenPolygon;
+  Generator* generator;
 
  public:
   Kaleidoscope(Renderer& renderer, Mode mode)
@@ -39,26 +106,25 @@ class Kaleidoscope {
         screenPolygon(screenClipVertices, 4) {
     switch (mode) {
       case Mode::ONE:
-        clipPolygon = new ClipPolygon(screenClipVertices, 4);
+        generator = new OneGenerator(engine);
         break;
       case Mode::TWO:
-        clipPolygon = new ClipPolygon(modeTwoClipVertices, 4);
+        generator = new TwoGenerator(engine);
         break;
       case Mode::FOUR:
-        clipPolygon = new ClipPolygon(modeFourClipVertices, 4);
+        generator = new FourGenerator(engine);
         break;
       case Mode::EIGHT:
-        clipPolygon = new ClipPolygon(modeEightClipVertices, 3);
+        generator = new EightGenerator(engine);
         break;
       case Mode::SIXTEEN:
-        clipPolygon = new ClipPolygon(modeSixteenClipVertices, 3);
+        generator = new SixteenGenerator(engine);
         break;
     }
-    engine.setViewport(clipPolygon);
   };
 
   void render(Array<Object*>& objects, Camera& camera) {
-    Buffer<Line>& generated = generateLines(objects, camera);
+    Buffer<Line>& generated = generator->generateLines(objects, camera);
 
     // Modes eight & sixteen require additional clipping against viewport
     Buffer<Line>& lines = (mode == Mode::EIGHT || mode == Mode::SIXTEEN)
@@ -72,28 +138,6 @@ class Kaleidoscope {
   }
 
  private:
-  Buffer<Line>& generateLines(Array<Object*>& objects, Camera& camera) {
-    Buffer<Object*>& transformed = engine.transformObjects(objects, camera);
-    Buffer<Line>& lines = engine.clipObjects(transformed);
-
-    switch (mode) {
-      case Mode::TWO:
-        mirrorTwo(lines);
-        break;
-      case Mode::FOUR:
-        mirrorFour(lines);
-        break;
-      case Mode::EIGHT:
-        mirrorEight(lines);
-        break;
-      case Mode::SIXTEEN:
-        mirrorSixteen(lines);
-        break;
-    }
-
-    return lines;
-  }
-
   Buffer<Line>& clipLines(Buffer<Line>& lines, ClipPolygon& polygon) {
     clippedLines.reset();
     for (int i = 0; i < lines.count(); i++) {
@@ -109,35 +153,6 @@ class Kaleidoscope {
       }
     }
     return clippedLines;
-  }
-
-  void mirrorTwo(Buffer<Line>& lines) { mirror(mirrorHorizontal, lines); }
-
-  void mirrorFour(Buffer<Line>& lines) {
-    mirror(mirrorHorizontal, lines);
-    mirror(mirrorVertical, lines);
-  }
-
-  void mirrorEight(Buffer<Line>& lines) {
-    mirror(mirror45Degrees, lines);
-    mirror(mirrorHorizontal, lines);
-    mirror(mirrorVertical, lines);
-  }
-
-  void mirrorSixteen(Buffer<Line>& lines) {
-    mirror(mirror22AndHalfDegrees, lines);
-    mirror(mirror45Degrees, lines);
-    mirror(mirrorHorizontal, lines);
-    mirror(mirrorVertical, lines);
-  }
-
-  void mirror(mat2 matrix, Buffer<Line>& lines) {
-    for (int i = lines.count() - 1; i >= 0; i--) {
-      Line line;
-      glm_mat2_mulv(matrix, lines[i].a, line.a);
-      glm_mat2_mulv(matrix, lines[i].b, line.b);
-      lines.add(line);
-    }
   }
 };
 }  // namespace osc
