@@ -2,58 +2,79 @@
 #define __KALEIDOSCOPE__
 
 #include "Engine.h"
+#include "Generator.h"
 
-// TODO: Needs fixing due to engine refactoring
 namespace osc {
-class Kaleidoscope : public Engine {
+class Kaleidoscope {
  public:
-  enum Mode { HORIZONTAL, VERTICAL, QUAD };
+  enum Mode { ONE, TWO, FOUR, EIGHT, SIXTEEN };
 
  private:
+  vec2 screenClipVertices[4] = {
+      {-1.0, 0.75}, {1.0, 0.75}, {1.0, -0.75}, {-1.0, -0.75}};
+
+  Engine engine;
   Mode mode;
+  Buffer<Line> clippedLines;
+  Clipper clipper;
+  ClipPolygon screenPolygon;
+  Generator* generator;
 
  public:
-  Kaleidoscope(int resolution, int xPin, int yPin, int maxVertices,
-               Mode mode = Mode::HORIZONTAL)
-      : Engine(resolution, xPin, yPin, maxVertices), mode(mode){};
+  Kaleidoscope(Renderer& renderer, Mode mode)
+      : engine(renderer),
+        mode(mode),
+        clippedLines(10000),
+        screenPolygon(screenClipVertices, 4) {
+    switch (mode) {
+      case Mode::ONE:
+        generator = new OneGenerator(engine);
+        break;
+      case Mode::TWO:
+        generator = new TwoGenerator(engine);
+        break;
+      case Mode::FOUR:
+        generator = new FourGenerator(engine);
+        break;
+      case Mode::EIGHT:
+        generator = new EightGenerator(engine);
+        break;
+      case Mode::SIXTEEN:
+        generator = new SixteenGenerator(engine);
+        break;
+    }
+  };
 
-  void render(Object** objects, int objectCount, Camera& camera) {
-    if (mode == Mode::HORIZONTAL) {
-      Renderer::Viewport viewports[] = {{1, -1, 0, 1}, {1, -1, -1, 0}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{-1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
+  void render(Array<Object*>& objects, Camera& camera) {
+    Buffer<Line>& generated = generator->generateLines(objects, camera);
 
-      for (int i = 0; i < 2; i++) {
-        renderer->setViewport(viewports[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
-      }
+    // Modes eight & sixteen require additional clipping against viewport
+    Buffer<Line>& lines = (mode == Mode::EIGHT || mode == Mode::SIXTEEN)
+                              ? clipLines(generated, screenPolygon)
+                              : generated;
 
-    } else if (mode == Mode::VERTICAL) {
-      Renderer::Viewport viewports[] = {{1, 0, -1, 1}, {0, -1, -1, 1}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
+    engine.renderLines(lines);
 
-      for (int i = 0; i < 2; i++) {
-        renderer->setViewport(viewports[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
-      }
+    vec2 blankingPoint = {1.0, 1.0};
+    engine.getRenderer().drawPoint(blankingPoint);
+  }
 
-    } else if (mode == Mode::QUAD) {
-      Renderer::Viewport viewports[] = {
-          {1, 0, 0, 1}, {0, -1, 0, 1}, {0, -1, -1, 0}, {1, 0, -1, 0}};
-      mat4 matrices[] = {
-          GLM_MAT4_IDENTITY_INIT,
-          {{1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}},
-          {{-1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}},
-          {{-1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
+ private:
+  Buffer<Line>& clipLines(Buffer<Line>& lines, ClipPolygon& polygon) {
+    clippedLines.reset();
+    for (int i = 0; i < lines.count(); i++) {
+      vec2 a, b;
+      glm_vec2_copy(lines[i].a, a);
+      glm_vec2_copy(lines[i].b, b);
 
-      for (int i = 0; i < 4; i++) {
-        renderer->setViewport(viewports[i]);
-        renderObjects(objects, objectCount, camera, &matrices[i]);
+      if (clipper.clipLine(a, b, polygon)) {
+        Line line;
+        glm_vec2_copy(a, line.a);
+        glm_vec2_copy(b, line.b);
+        clippedLines.add(line);
       }
     }
+    return clippedLines;
   }
 };
 }  // namespace osc

@@ -17,6 +17,8 @@ using namespace osc;
 
 Engine::~Engine() { delete viewport; }
 
+Renderer& Engine::getRenderer() { return renderer; }
+
 void Engine::setViewport(ClipPolygon* vp) { viewport = vp; }
 
 void Engine::setBlankingPoint(float x, float y) {
@@ -101,8 +103,9 @@ Buffer<Line>& Engine::clipObjects(Buffer<Object*>& objects) {
 
     for (int j = 0; j < object->mesh->edgeCount; j++) {
       Edge* edge = &object->mesh->edges[j];
-      vec2 a = {object->projected[edge->a][0], object->projected[edge->a][1]};
-      vec2 b = {object->projected[edge->b][0], object->projected[edge->b][1]};
+      vec2 a, b;
+      glm_vec2_copy(object->projected[edge->a], a);
+      glm_vec2_copy(object->projected[edge->b], b);
 
       if (clipper.clipLine(a, b, *viewport)) {
         Line line;

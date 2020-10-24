@@ -117,12 +117,12 @@ class Engine {
     viewport = new ClipPolygon(defaultViewportVertices, 4);
   };
   ~Engine();
+  Renderer& getRenderer();
   void setViewport(ClipPolygon* vp);
   void setBlankingPoint(float x, float y);
   void render(Array<Object*>& objects, Camera& camera);
   void renderViewport();
 
- private:
   Buffer<Object*>& transformObjects(Array<Object*>& objects, Camera& camera);
   Buffer<Line>& clipObjects(Buffer<Object*>& objects);
   void renderLines(Buffer<Line>& lines);
