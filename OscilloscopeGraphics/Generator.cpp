@@ -1,4 +1,4 @@
-#include "Kaleidoscope.h"
+#include "Generator.h"
 
 using namespace osc;
 
@@ -7,9 +7,9 @@ Buffer<Line>& Generator::generateLines(Array<Object*>& objects,
   engine.setViewport(&getClipPolygon());
   Buffer<Object*>& transformed = engine.transformObjects(objects, camera);
   Buffer<Line>& clipped = engine.clipObjects(transformed);
-  mirror(clipped);
+  Buffer<Line>& mirrored = mirror(clipped);
 
-  return clipped;
+  return mirrored;
 }
 
 void Generator::applyMatrix(mat2 matrix, Buffer<Line>& lines) {
