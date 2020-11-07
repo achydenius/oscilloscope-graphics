@@ -21,7 +21,7 @@ osc::Engine engine(renderer);
 
 osc::Mesh *mesh = osc::MeshBuilder::createPlane(1.0);
 osc::Array<osc::Object*> objects({ new osc::Object(mesh) });
-osc::Camera camera;
+osc::LookAtCamera camera;
 
 void setup() {
   camera.setEye(0, 0, 4.0);

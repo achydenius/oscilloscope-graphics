@@ -8,7 +8,7 @@ osc::Kaleidoscope engine(renderer, osc::Kaleidoscope::Mode::FOUR);
 int objectCount = 2;
 osc::Mesh *mesh = osc::MeshBuilder::createCube(1.0);
 osc::Array<osc::Object *> objects(objectCount);
-osc::Camera camera;
+osc::LookAtCamera camera;
 
 void setup() {
   for (int i = 0; i < objects.getSize(); i++) {

@@ -12,7 +12,7 @@ osc::Engine engine(renderer);
 int objectCount = 8;
 osc::Mesh *mesh = osc::MeshBuilder::createCube(1.0);
 osc::Array<osc::Object *> objects(objectCount);
-osc::Camera camera;
+osc::LookAtCamera camera;
 vec2 viewportVertices[] = {{-1.0, 0.5}, {1.0, 0.5}, {1.0, -0.5}, {-1.0, -0.5}};
 
 void setup() {

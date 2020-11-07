@@ -1,5 +1,6 @@
 #include "Engine.h"
 
+#include "Camera.h"
 #include "Mesh.h"
 
 #ifdef PROFILE
@@ -53,12 +54,8 @@ void Engine::render(Array<Object*>& objects, Camera& camera) {
 
 Buffer<Object*>& Engine::transformObjects(Array<Object*>& objects,
                                           Camera& camera) {
-  mat4 projection, view, scaling, translation, rotation, matrix;
-
-  // Get view & projection matrices
-  glm_perspective(camera.fov, camera.aspect, camera.near, camera.far,
-                  projection);
-  glm_lookat(camera.eye, camera.center, camera.up, view);
+  mat4 scaling, translation, rotation, matrix;
+  mat4& cam = camera.getMatrix();
 
   transformedObjects.reset();
   for (int i = 0; i < objects.getSize(); i++) {
@@ -69,18 +66,10 @@ Buffer<Object*>& Engine::transformObjects(Array<Object*>& objects,
     glm_translate_make(translation, object->translation);
     glm_euler(object->rotation, rotation);
 
-    mat4* matrices[] = {&projection, &view, &translation, &rotation, &scaling};
-    glm_mat4_mulN(matrices, 5, matrix);
+    mat4* matrices[] = {&cam, &translation, &rotation, &scaling};
+    glm_mat4_mulN(matrices, 4, matrix);
 
-    // Cull object against near plane
-    // TODO: Make this a bit cleaner?
-    vec3 sphereCenter;
-    glm_mat4_mulv3(matrix, object->mesh->boundingSphere, 1.0, sphereCenter);
-    float scale = glm_max(glm_max(object->scaling[0], object->scaling[1]),
-                          object->scaling[2]);
-
-    if (sphereCenter[2] - object->mesh->boundingSphere[3] * scale >=
-        camera.near) {
+    if (camera.isVisible(*object, matrix)) {
       // Transform vertices
       for (int i = 0; i < object->mesh->vertexCount; i++) {
         vec4 vertex, transformed;
