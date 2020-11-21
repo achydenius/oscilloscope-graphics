@@ -15,4 +15,4 @@ Tested with [Adafruit Metro M4](https://www.adafruit.com/product/3382) but any A
 ## Running
 
 1. Upload `oscilloscope-graphics.ino` to Arduino with Arduino IDE
-2. Start Python program on connected device with `python3 client.py`
+2. Start Python program on connected device with `python3 example.py`
