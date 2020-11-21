@@ -6,7 +6,7 @@
 
 #include <Arduino.h>
 
-#include "Engine.h"
+#include "types.h"
 
 namespace osc {
 class Server {

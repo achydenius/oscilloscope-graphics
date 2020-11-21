@@ -2,6 +2,7 @@
 #define __CLIPPER__
 
 #include "Renderer.h"
+#include "src/cglm/include/cglm/cglm.h"
 
 namespace osc {
 class ClipPolygon {
