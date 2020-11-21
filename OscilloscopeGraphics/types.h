@@ -1,6 +1,8 @@
 #ifndef __TYPES__
 #define __TYPES__
 
+#include <math.h>
+
 namespace osc {
 
 class Point {
