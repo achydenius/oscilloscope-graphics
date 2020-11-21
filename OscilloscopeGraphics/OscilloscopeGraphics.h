@@ -4,5 +4,6 @@
 #include "Clipper.h"
 #include "Renderer.h"
 #include "Server.h"
+#include "types.h"
 
 #endif

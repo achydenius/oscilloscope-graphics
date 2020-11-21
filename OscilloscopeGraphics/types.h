@@ -1,12 +1,30 @@
 #ifndef __TYPES__
 #define __TYPES__
 
-#include "src/cglm/include/cglm/cglm.h"
-
 namespace osc {
 
+class Point {
+ public:
+  float x, y;
+
+  float dot(Point& point) { return (x * point.x) + (y * point.y); }
+
+  void sub(Point& point, Point& result) {
+    result.x = x - point.x;
+    result.y = y - point.y;
+  };
+
+  float length() { return sqrt((x * x) + (y * y)); }
+
+  void normalize() {
+    float len = length();
+    x /= len;
+    y /= len;
+  }
+};
+
 struct Line {
-  vec2 a, b;
+  Point a, b;
 };
 
 template <typename T>

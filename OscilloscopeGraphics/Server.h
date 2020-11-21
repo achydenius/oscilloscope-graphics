@@ -38,11 +38,11 @@ class Server {
 
     lines.reset();
     for (int i = 0; i < coordCount; i += 4) {
-      osc::Line line;
-      line.a[0] = coords[i];
-      line.a[1] = coords[i + 1];
-      line.b[0] = coords[i + 2];
-      line.b[1] = coords[i + 3];
+      Line line;
+      line.a.x = coords[i];
+      line.a.y = coords[i + 1];
+      line.b.x = coords[i + 2];
+      line.b.y = coords[i + 3];
       lines.add(line);
     }
   }

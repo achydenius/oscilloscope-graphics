@@ -4,9 +4,9 @@ using namespace osc;
 
 void ArduinoRenderer::setWriteMode(DACWriteMode mode) { writeMode = mode; }
 
-void ArduinoRenderer::drawPoint(vec2& v) {
-  int32_t x = transform(v[0]);
-  int32_t y = transform(v[1]);
+void ArduinoRenderer::drawPoint(Point& point) {
+  int32_t x = transform(point.x);
+  int32_t y = transform(point.y);
   uint32_t shift = 12 - resolution;
 
   if (writeMode == DACWriteMode::INLINE) {
@@ -24,11 +24,11 @@ void ArduinoRenderer::drawPoint(vec2& v) {
  * DDA line drawing algorithm implementation:
  * https://www.geeksforgeeks.org/dda-line-generation-algorithm-computer-graphics/
  */
-void ArduinoRenderer::drawLine(vec2& a, vec2& b) {
-  int32_t x0 = transform(a[0]);
-  int32_t y0 = transform(a[1]);
-  int32_t x1 = transform(b[0]);
-  int32_t y1 = transform(b[1]);
+void ArduinoRenderer::drawLine(Line& line) {
+  int32_t x0 = transform(line.a.x);
+  int32_t y0 = transform(line.a.y);
+  int32_t x1 = transform(line.b.x);
+  int32_t y1 = transform(line.b.y);
 
   int32_t dx = x1 - x0;
   int32_t dy = y1 - y0;
