@@ -11,10 +11,18 @@ class OscilloscopeGraphics {
   Server& server;
   Clipper& clipper;
   Buffer<Line>* lines;
+  Point blankingPoint = {1.0, 1.0};
 
  public:
   OscilloscopeGraphics(Renderer& renderer, Server& server, Clipper& clipper)
       : renderer(renderer), server(server), clipper(clipper) {}
+
+  OscilloscopeGraphics(Renderer& renderer, Server& server, Clipper& clipper,
+                       Point blankingPoint)
+      : renderer(renderer),
+        server(server),
+        clipper(clipper),
+        blankingPoint(blankingPoint) {}
 
   Renderer& getRenderer() { return renderer; }
   Server& getServer() { return server; }
@@ -28,6 +36,8 @@ class OscilloscopeGraphics {
         renderer.drawLine((*lines)[i]);
       }
     }
+
+    renderer.drawPoint(blankingPoint);
   }
 };
 }  // namespace osc
