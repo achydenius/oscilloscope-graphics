@@ -6,13 +6,19 @@ Tested with [Adafruit Metro M4](https://www.adafruit.com/product/3382) but any A
 
 ![Picture of oscilloscope running an example](https://raw.githubusercontent.com/achydenius/oscilloscope-graphics/master/media-lab-demo-day.jpg)
 
-## Arduino/MacOS installation
+## Arduino
 
-1. Install the Oscilloscope Graphics library by moving the _OscilloscopeGraphics_ folder to Arduino _libraries_ folder
-2. Install [Python 3](https://www.python.org/) with `brew install python3`
-3. Install [pySerial](https://github.com/pyserial/pyserial) with `pip3 install pyserial`
+Install the Oscilloscope Graphics library by moving the _OscilloscopeGraphics_ folder to Arduino _libraries_ folder
+
+## MacOS example installation
+
+[Python 3](https://www.python.org/) and [Pipenv](https://github.com/pypa/pipenv) are required for installing and running the example.
+
+1. Install Python 3 with `brew install python3`
+2. Install Pipenv with `brew install pipenv`
+3. Install dependencies with `pipenv install`
 
 ## Running
 
 1. Upload `oscilloscope-graphics.ino` to Arduino with Arduino IDE
-2. Start Python program on connected device with `python3 example.py`
+2. Start Python program with `pipenv run python example.py`
