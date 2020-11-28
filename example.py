@@ -7,6 +7,14 @@ SERIAL_PORT_NAME = '/dev/cu.usbmodem1432201'
 SERIAL_PORT_BAUDRATE = 115200
 
 
+def calculate_normal(vertices, face):
+    a = vertices[face[0]] - vertices[face[1]]
+    b = vertices[face[0]] - vertices[face[2]]
+    normal = a ^ b
+    normal.normalize()
+    return normal
+
+
 def create_icosahedron():
     x = 0.525731112119133606
     z = 0.850650808352039932
@@ -42,8 +50,8 @@ def find_edges(faces):
 
 
 def edges_to_lines(vertices, edges):
-    return [((vertices[edge[0]][0], vertices[edge[0]][1]),
-             (vertices[edge[1]][0], vertices[edge[1]][1])) for edge in edges]
+    return [((vertices[edge[0]].x, vertices[edge[0]].y),
+             (vertices[edge[1]].x, vertices[edge[1]].y)) for edge in edges]
 
 
 if __name__ == '__main__':
@@ -59,13 +67,12 @@ if __name__ == '__main__':
         projection = Matrix44.perspective_projection(45.0, 1.0, 0.01, 100.0)
         matrix = projection * translation * rotation
 
-        # Transform vertices
+        # Transform vertices, remove hidden faces and find edges
         vertices = [matrix * vertex for vertex in mesh['vertices']]
+        faces = [face for face in mesh['faces'] if calculate_normal(vertices, face).z > 0]
+        edges = find_edges(faces)
 
-        # Find unique edges
-        edges = find_edges(mesh['faces'])
-
-        # Convert edges to lines in client format
+        # Convert edges and vertices to lines in serial format
         lines = edges_to_lines(vertices, edges)
 
         client.send(lines)
