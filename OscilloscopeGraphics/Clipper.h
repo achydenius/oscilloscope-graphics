@@ -7,12 +7,12 @@ namespace osc {
 class ClipPolygon {
  public:
   int vertexCount;
-  vec2* vertices;
-  vec2* normals;
+  Point* vertices;
+  Point* normals;
 
-  ClipPolygon(vec2* vertices, int vertexCount)
+  ClipPolygon(Point* vertices, int vertexCount)
       : vertices(vertices), vertexCount(vertexCount) {
-    normals = new vec2[vertexCount];
+    normals = new Point[vertexCount];
     calculateNormals();
   };
   ~ClipPolygon();
@@ -22,8 +22,20 @@ class ClipPolygon {
 };
 
 class Clipper {
+  static const int defaultVertexCount = 4;
+  Point defaultVertices[defaultVertexCount] = {
+      {-1.0, 0.5}, {1.0, 0.5}, {1.0, -0.5}, {-1.0, -0.5}};
+  ClipPolygon* viewport;
+
  public:
-  bool clipLine(vec2& a, vec2& b, ClipPolygon& polyggon);
+  Clipper() { viewport = new ClipPolygon(defaultVertices, defaultVertexCount); }
+  Clipper(ClipPolygon& polygon) { viewport = &polygon; }
+
+  bool clipLine(Line& line);
+
+ private:
+  float minValue(float a, float b);
+  float maxValue(float a, float b);
 };
 }  // namespace osc
 

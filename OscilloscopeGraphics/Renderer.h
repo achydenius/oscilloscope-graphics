@@ -3,13 +3,13 @@
 
 #include <Arduino.h>
 
-#include "src/cglm/include/cglm/cglm.h"
+#include "types.h"
 
 namespace osc {
 class Renderer {
  public:
-  virtual void drawPoint(vec2& v) = 0;
-  virtual void drawLine(vec2& a, vec2& b) = 0;
+  virtual void drawPoint(Point& point) = 0;
+  virtual void drawLine(Line& line) = 0;
 };
 
 class ArduinoRenderer : public Renderer {
@@ -37,8 +37,8 @@ class ArduinoRenderer : public Renderer {
     analogWrite(yPin, 0);
   }
   void setWriteMode(DACWriteMode mode);
-  void drawPoint(vec2& v);
-  void drawLine(vec2& a, vec2& b);
+  void drawPoint(Point& point);
+  void drawLine(Line& line);
 
  private:
   uint32_t transform(float value);
