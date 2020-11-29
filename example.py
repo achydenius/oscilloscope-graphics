@@ -1,4 +1,4 @@
-from client import Client
+from osc import Api
 from math import pi, sin, sqrt
 from time import sleep
 from pyrr import Vector3, Matrix44
@@ -55,8 +55,8 @@ def edges_to_lines(vertices, edges):
 
 
 if __name__ == '__main__':
-    Client.print_ports()
-    client = Client(SERIAL_PORT_NAME, SERIAL_PORT_BAUDRATE)
+    Api.print_ports()
+    api = Api(SERIAL_PORT_NAME, SERIAL_PORT_BAUDRATE)
 
     mesh = create_icosahedron()
     phase = 0
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         # Convert edges and vertices to lines in serial format
         lines = edges_to_lines(vertices, edges)
 
-        client.send(lines)
+        api.send(lines)
         phase += 0.02
 
         sleep(0.01)

@@ -2,34 +2,34 @@
 #define __OSCILLOSCOPE_GRAPHICS__
 
 #include "Clipper.h"
+#include "Consumer.h"
 #include "Renderer.h"
-#include "Server.h"
 
 namespace osc {
 class OscilloscopeGraphics {
   Renderer& renderer;
-  Server& server;
+  Consumer& consumer;
   Clipper& clipper;
   Buffer<Line>* lines;
   Point blankingPoint = {1.0, 1.0};
 
  public:
-  OscilloscopeGraphics(Renderer& renderer, Server& server, Clipper& clipper)
-      : renderer(renderer), server(server), clipper(clipper) {}
+  OscilloscopeGraphics(Renderer& renderer, Consumer& consumer, Clipper& clipper)
+      : renderer(renderer), consumer(consumer), clipper(clipper) {}
 
-  OscilloscopeGraphics(Renderer& renderer, Server& server, Clipper& clipper,
+  OscilloscopeGraphics(Renderer& renderer, Consumer& consumer, Clipper& clipper,
                        Point blankingPoint)
       : renderer(renderer),
-        server(server),
+        consumer(consumer),
         clipper(clipper),
         blankingPoint(blankingPoint) {}
 
   Renderer& getRenderer() { return renderer; }
-  Server& getServer() { return server; }
+  Consumer& getConsumer() { return consumer; }
   Clipper& getClipper() { return clipper; }
 
   void getAndRenderLines() {
-    lines = server.getLines();
+    lines = consumer.getLines();
 
     for (int i = 0; i < lines->count(); i++) {
       if (clipper.clipLine((*lines)[i])) {

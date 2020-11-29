@@ -1,5 +1,5 @@
-#ifndef __SERVER__
-#define __SERVER__
+#ifndef __CONSUMER__
+#define __CONSUMER__
 
 #define MAX_LINES 256
 #define COORD_BYTES 4
@@ -7,12 +7,12 @@
 #include "types.h"
 
 namespace osc {
-class Server {
+class Consumer {
   long speed;
   Buffer<Line> lines;
 
  public:
-  Server(unsigned long speed = 115200)
+  Consumer(unsigned long speed = 115200)
       : speed(speed), lines(MAX_LINES * COORD_BYTES * 4) {}
 
   void start();

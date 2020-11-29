@@ -2,7 +2,7 @@ import serial.tools.list_ports
 import struct
 
 
-class Client:
+class Api:
     def __init__(self, port_name, baudrate):
         self.port = serial.Serial(port_name, baudrate)
 
