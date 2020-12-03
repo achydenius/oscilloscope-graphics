@@ -1,4 +1,4 @@
-from osc import Api
+from osc import Api, Clipper
 from math import pi, sin, sqrt
 from time import sleep
 from pyrr import Vector3, Matrix44
@@ -49,14 +49,14 @@ def find_edges(faces):
     return edges
 
 
-def edges_to_lines(vertices, edges):
-    return [((vertices[edge[0]].x, vertices[edge[0]].y),
-             (vertices[edge[1]].x, vertices[edge[1]].y)) for edge in edges]
+def edges_to_lines(edges, vertices):
+    return [(vertices[edge[0]], vertices[edge[1]]) for edge in edges]
 
 
 if __name__ == '__main__':
     Api.print_ports()
     api = Api(SERIAL_PORT_NAME, SERIAL_PORT_BAUDRATE)
+    clipper = Clipper()
 
     mesh = create_icosahedron()
     phase = 0
@@ -69,13 +69,17 @@ if __name__ == '__main__':
 
         # Transform vertices, remove hidden faces and find edges
         vertices = [matrix * vertex for vertex in mesh['vertices']]
-        faces = [face for face in mesh['faces'] if calculate_normal(vertices, face).z > 0]
+        faces = [face for face in mesh['faces']
+                 if calculate_normal(vertices, face).z > 0]
         edges = find_edges(faces)
 
-        # Convert edges and vertices to lines in serial format
-        lines = edges_to_lines(vertices, edges)
+        # Clip lines
+        lines = edges_to_lines(edges, vertices)
+        clipped_lines = [clipped
+                         for clipped in [clipper.clip_line(line) for line in lines]
+                         if clipped is not None]
 
-        api.send(lines)
+        api.send(clipped_lines)
         phase += 0.02
 
         sleep(0.01)
