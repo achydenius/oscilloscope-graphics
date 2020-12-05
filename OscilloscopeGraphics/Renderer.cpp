@@ -1,13 +1,16 @@
 #include "Renderer.h"
 
+#define INPUT_BITS 16
+#define DAC_MAX_RESOLUTION_BITS 12
+
 using namespace osc;
 
-void ArduinoRenderer::setWriteMode(DACWriteMode mode) { writeMode = mode; }
+void Renderer::setWriteMode(DACWriteMode mode) { writeMode = mode; }
 
-void ArduinoRenderer::drawPoint(Point& point) {
+void Renderer::drawPoint(Point<uint16_t>& point) {
   int32_t x = transform(point.x);
   int32_t y = transform(point.y);
-  uint32_t shift = 12 - resolution;
+  uint32_t shift = DAC_MAX_RESOLUTION_BITS - resolution;
 
   if (writeMode == DACWriteMode::INLINE) {
     dacWriteInline(x, y, shift);
@@ -24,7 +27,7 @@ void ArduinoRenderer::drawPoint(Point& point) {
  * DDA line drawing algorithm implementation:
  * https://www.geeksforgeeks.org/dda-line-generation-algorithm-computer-graphics/
  */
-void ArduinoRenderer::drawLine(Line& line) {
+void Renderer::drawLine(Line<uint16_t>& line) {
   int32_t x0 = transform(line.a.x);
   int32_t y0 = transform(line.a.y);
   int32_t x1 = transform(line.b.x);
@@ -39,7 +42,7 @@ void ArduinoRenderer::drawLine(Line& line) {
 
   float x = x0;
   float y = y0;
-  uint32_t shift = 12 - resolution;
+  uint32_t shift = DAC_MAX_RESOLUTION_BITS - resolution;
 
   if (writeMode == DACWriteMode::INLINE) {
     for (int32_t i = 0; i <= steps; i++) {
@@ -62,18 +65,17 @@ void ArduinoRenderer::drawLine(Line& line) {
   }
 }
 
-// Transform value from canvas space to output space
-inline uint32_t ArduinoRenderer::transform(float value) {
-  return (uint32_t)(((value * 0.5) + 0.5) * maxValue);
+// Scale input value to resolution value
+inline uint32_t Renderer::transform(uint16_t value) {
+  return value >> (INPUT_BITS - resolution);
 }
 
-inline void ArduinoRenderer::dacWriteAnalogWrite(uint32_t x, uint32_t y) {
+inline void Renderer::dacWriteAnalogWrite(uint32_t x, uint32_t y) {
   analogWrite(xPin, x);
   analogWrite(yPin, y);
 }
 
-inline void ArduinoRenderer::dacWriteInline(uint32_t x, uint32_t y,
-                                            uint32_t shift) {
+inline void Renderer::dacWriteInline(uint32_t x, uint32_t y, uint32_t shift) {
   while (!DAC->STATUS.bit.READY0)
     ;
   while (DAC->SYNCBUSY.bit.DATA0)
@@ -86,8 +88,8 @@ inline void ArduinoRenderer::dacWriteInline(uint32_t x, uint32_t y,
     ;
   DAC->DATA[1].reg = y << shift;
 }
-inline void ArduinoRenderer::dacWriteDirect(uint32_t x, uint32_t y,
-                                            uint32_t shift) {
+
+inline void Renderer::dacWriteDirect(uint32_t x, uint32_t y, uint32_t shift) {
   DAC->DATA[0].reg = x << shift;
   DAC->DATA[1].reg = y << shift;
 }

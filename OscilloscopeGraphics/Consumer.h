@@ -2,25 +2,38 @@
 #define __CONSUMER__
 
 #define MAX_LINES 256
-#define COORD_BYTES 4
 
 #include "types.h"
 
 namespace osc {
+
+template <typename T>
 class Consumer {
   long speed;
-  Buffer<Line> lines;
+  Buffer<Line<T>> lines;
 
  public:
   Consumer(unsigned long speed = 115200)
-      : speed(speed), lines(MAX_LINES * COORD_BYTES * 4) {}
+      : speed(speed), lines(MAX_LINES * sizeof(T) * 4) {}
 
-  void start();
-  Buffer<Line>* getLines();
+  void start() {
+    Serial.begin(speed);
+    Serial.setTimeout(0);
+  };
 
- private:
-  void parseData(const char* data, Buffer<Line>& lines);
+  Buffer<Line<T>>* getLines() {
+    if (Serial.available() > 0) {
+      // TODO: Replace with readBytes()?
+      String data = Serial.readString();
+      parseData(data.c_str(), lines);
+    }
+    return &lines;
+  };
+
+ protected:
+  virtual void parseData(const char* data, Buffer<Line<T>>& lines) = 0;
 };
+
 }  // namespace osc
 
 #endif

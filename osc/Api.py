@@ -2,6 +2,9 @@ import serial.tools.list_ports
 import struct
 
 
+UNSIGNED_SHORT_MAX = 65535
+
+
 class Api:
     def __init__(self, port_name, baudrate):
         self.port = serial.Serial(port_name, baudrate)
@@ -21,11 +24,15 @@ class Api:
                   for coords in line
                   for coord in coords]
 
-        # Format coordinates as binary floats
-        bytes = [struct.pack('<f', coord) for coord in coords]
+        # Format coordinates as unsigned shorts
+        bytes = [struct.pack('<H', self._float_to_unsigned_short(coord))
+                 for coord in coords]
 
         # First four bytes define the length of the list
         bytes.insert(0, len(coords).to_bytes(
             4, byteorder='little', signed=True))
 
         return bytearray(b''.join(bytes))
+
+    def _float_to_unsigned_short(self, value):
+        return int(((value * 0.5) + 0.5) * UNSIGNED_SHORT_MAX)

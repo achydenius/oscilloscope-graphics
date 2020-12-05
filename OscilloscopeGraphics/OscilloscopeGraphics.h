@@ -1,26 +1,26 @@
 #ifndef __OSCILLOSCOPE_GRAPHICS__
 #define __OSCILLOSCOPE_GRAPHICS__
 
-#include "Consumer.h"
 #include "Renderer.h"
+#include "UInt16Consumer.h"
 
 namespace osc {
 class OscilloscopeGraphics {
   Renderer& renderer;
-  Consumer& consumer;
-  Buffer<Line>* lines;
-  Point blankingPoint = {1.0, 1.0};
+  UInt16Consumer& consumer;
+  Buffer<Line<uint16_t>>* lines;
+  Point<uint16_t> blankingPoint = {0, 0};
 
  public:
-  OscilloscopeGraphics(Renderer& renderer, Consumer& consumer)
+  OscilloscopeGraphics(Renderer& renderer, UInt16Consumer& consumer)
       : renderer(renderer), consumer(consumer) {}
 
-  OscilloscopeGraphics(Renderer& renderer, Consumer& consumer,
-                       Point blankingPoint)
+  OscilloscopeGraphics(Renderer& renderer, UInt16Consumer& consumer,
+                       Point<uint16_t> blankingPoint)
       : renderer(renderer), consumer(consumer), blankingPoint(blankingPoint) {}
 
   Renderer& getRenderer() { return renderer; }
-  Consumer& getConsumer() { return consumer; }
+  UInt16Consumer& getConsumer() { return consumer; }
 
   void getAndRenderLines() {
     lines = consumer.getLines();
