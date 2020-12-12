@@ -1,4 +1,5 @@
 from osc import Api, Clipper
+from osc.mesh import create_icosahedron
 from math import pi, sin, sqrt
 from time import sleep
 from pyrr import Vector3, Matrix44
@@ -13,25 +14,6 @@ def calculate_normal(vertices, face):
     normal = a ^ b
     normal.normalize()
     return normal
-
-
-def create_icosahedron():
-    x = 0.525731112119133606
-    z = 0.850650808352039932
-
-    return {
-        'vertices': [
-            Vector3([-x, 0, z]), Vector3([x, 0, z]), Vector3([-x, 0, -z]), Vector3([x, 0, -z]),
-            Vector3([0, z, x]), Vector3([0, z, -x]), Vector3([0, -z, x]), Vector3([0, -z, -x]),
-            Vector3([z, x, 0]), Vector3([-z, x, 0]), Vector3([z, -x, 0]), Vector3([-z, -x, 0])
-        ],
-        'faces': [
-            [0, 4, 1], [0, 9, 4], [9, 5, 4], [4, 5, 8], [4, 8, 1],
-            [8, 10, 1], [8, 3, 10], [5, 3, 8], [5, 2, 3], [2, 7, 3],
-            [7, 10, 3], [7, 6, 10], [7, 11, 6], [11, 0, 6], [0, 1, 6],
-            [6, 1, 10], [9, 0, 11], [9, 11, 2], [9, 2, 5], [7, 2, 11]
-        ]
-    }
 
 
 def find_edges(faces):
@@ -62,8 +44,8 @@ if __name__ == '__main__':
     phase = 0
     while True:
         # Create transformation matrix
-        translation = Matrix44.from_translation([sin(phase), 0, 5.0])
-        rotation = Matrix44.from_eulers([0, phase, phase * 0.5])
+        translation = Matrix44.from_translation([0, 0, 5.0])
+        rotation = Matrix44.from_eulers([phase * 0.4, phase * 0.2, 0])
         projection = Matrix44.perspective_projection(45.0, 1.0, 0.01, 100.0)
         matrix = projection * translation * rotation
 
@@ -80,6 +62,4 @@ if __name__ == '__main__':
                          if clipped is not None]
 
         api.send(clipped_lines)
-        phase += 0.02
-
-        sleep(0.01)
+        phase += 0.01

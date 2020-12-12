@@ -26,7 +26,7 @@ class OscilloscopeGraphics {
     lines = consumer.getLines();
 
     for (int i = 0; i < lines->count(); i++) {
-      renderer.drawLine((*lines)[i]);
+      renderer.drawDashedLine((*lines)[i]);
     }
 
     renderer.drawPoint(blankingPoint);

@@ -29,7 +29,8 @@ class Renderer {
   }
 
   void drawPoint(Point<uint16_t>& point);
-  void drawLine(Line<uint16_t>& line);
+  void drawSolidLine(Line<uint16_t>& line);
+  void drawDashedLine(Line<uint16_t>& line);
 
  protected:
   virtual void dacWrite(uint32_t x, uint32_t y, uint32_t shift) = 0;
@@ -38,6 +39,13 @@ class Renderer {
   uint32_t transform(uint16_t value) {
     return value >> (INPUT_BITS - resolution);
   }
+  void render(Line<uint16_t>& line,
+              void (Renderer::*loop)(int32_t, float, float, float, float, float,
+                                     float, uint32_t));
+  void solidLoop(int32_t steps, float x, float y, float u, float ix, float iy,
+                 float iu, uint32_t shift);
+  void dashedLoop(int32_t steps, float x, float y, float u, float ix, float iy,
+                  float iu, uint32_t shift);
 };
 
 class StandardRenderer : public Renderer {
