@@ -2,7 +2,7 @@
 
 using namespace osc;
 
-void Renderer::drawPoint(Point<uint16_t>& point) {
+void Renderer::drawPoint(Point2D& point) {
   int32_t x = transform(point.x);
   int32_t y = transform(point.y);
   uint32_t shift = DAC_MAX_RESOLUTION_BITS - resolution;
@@ -10,11 +10,11 @@ void Renderer::drawPoint(Point<uint16_t>& point) {
   dacWrite(x, y, shift);
 }
 
-void Renderer::drawSolidLine(Line<uint16_t>& line) {
+void Renderer::drawSolidLine(Line<Point2D>& line) {
   render(line, &Renderer::solidLoop);
 }
 
-void Renderer::drawDashedLine(Line<uint16_t>& line) {
+void Renderer::drawDashedLine(Line<Point2D>& line) {
   render(line, &Renderer::dashedLoop);
 }
 
@@ -25,7 +25,7 @@ void Renderer::drawDashedLine(Line<uint16_t>& line) {
  * https://www.geeksforgeeks.org/dda-line-generation-algorithm-computer-graphics/
  */
 // TODO: Use inheritance be used instead of passing the function as an argument?
-void Renderer::render(Line<uint16_t>& line,
+void Renderer::render(Line<Point2D>& line,
                       void (Renderer::*loop)(int32_t, float, float, float,
                                              float, float, float, uint32_t)) {
   int32_t x0 = transform(line.a.x);

@@ -5,14 +5,13 @@
 
 namespace osc {
 
-template <typename T>
-struct Point {
-  T x, y;
+struct Point2D {
+  unsigned short x, y;
 };
 
 template <typename T>
 struct Line {
-  Point<T> a, b;
+  T a, b;
 };
 
 template <typename T>
