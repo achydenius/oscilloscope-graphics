@@ -9,6 +9,11 @@ struct Point2D {
   unsigned short x, y;
 };
 
+struct Point3D {
+  unsigned short x, y;
+  float z;
+};
+
 template <typename T>
 struct Line {
   T a, b;

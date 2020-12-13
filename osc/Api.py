@@ -18,21 +18,20 @@ class Api:
         self.port.write(self.lines_to_serial_data(lines))
 
     def lines_to_serial_data(self, lines):
-        # Flatten line coordinates to a one-dimensional list
-        coords = [coord
-                  for line in lines
-                  for coords in line
-                  for coord in coords]
+        # Flatten and pack lines to one-dimensional list of binary values
+        bytes = [self._pack_coords(coords)
+                 for line in lines
+                 for coords in line]
 
-        # Format coordinates as unsigned shorts
-        bytes = [struct.pack('<H', self._float_to_unsigned_short(coord))
-                 for coord in coords]
-
-        # First four bytes define the length of the list
-        bytes.insert(0, len(coords).to_bytes(
+        # First four bytes define the number of lines
+        bytes.insert(0, len(lines).to_bytes(
             4, byteorder='little', signed=True))
 
         return bytearray(b''.join(bytes))
 
     def _float_to_unsigned_short(self, value):
         return int(((value * 0.5) + 0.5) * UNSIGNED_SHORT_MAX)
+
+    def _pack_coords(self, coords):
+        return struct.pack('<HHf', *(self._float_to_unsigned_short(coord)
+                                     for coord in coords))

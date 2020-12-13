@@ -57,6 +57,6 @@ class Clipper:
             return None
 
         return (
-            (a.x + p1p0.x * te, a.y + p1p0.y * te),
-            (a.x + p1p0.x * tl, a.y + p1p0.y * tl)
+            (a.x + p1p0.x * te, a.y + p1p0.y * te, a.z + p1p0.z * te),
+            (a.x + p1p0.x * tl, a.y + p1p0.y * tl, a.z + p1p0.z * tl)
         )
