@@ -1,2 +1,2 @@
 from .Api import Api
-from .Clipper import Clipper
+from .clipper import Point, Line, Polygon, clip_line

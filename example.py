@@ -1,5 +1,5 @@
-from osc import Api, Clipper
-from math import pi, sin, sqrt
+from osc import Api, Polygon, clip_line
+from math import sin
 from time import sleep
 from pyrr import Vector3, Matrix44
 
@@ -56,10 +56,10 @@ def edges_to_lines(edges, vertices):
 if __name__ == '__main__':
     Api.print_ports()
     api = Api(SERIAL_PORT_NAME, SERIAL_PORT_BAUDRATE)
-    clipper = Clipper()
+    viewport = Polygon()
 
     mesh = create_icosahedron()
-    phase = 0
+    phase = .0
     while True:
         # Create transformation matrix
         translation = Matrix44.from_translation([sin(phase), 0, 5.0])
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         # Clip lines
         lines = edges_to_lines(edges, vertices)
         clipped_lines = [clipped
-                         for clipped in [clipper.clip_line(line) for line in lines]
+                         for clipped in [clip_line(line, viewport) for line in lines]
                          if clipped is not None]
 
         api.send(clipped_lines)
