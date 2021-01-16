@@ -26,14 +26,14 @@ class Api:
                   for coord in coords]
 
         # Format coordinates as unsigned shorts
-        bytes = [struct.pack('<H', self._float_to_unsigned_short(coord))
+        shorts = [struct.pack('<H', self._float_to_unsigned_short(coord))
                  for coord in coords]
 
-        # First four bytes define the length of the list
-        bytes.insert(0, len(coords).to_bytes(
-            4, byteorder='little', signed=True))
+        # First two bytes define the list size in bytes
+        shorts.insert(0, (len(coords) * 2).to_bytes(
+           2, byteorder='little', signed=False))
 
-        return bytearray(b''.join(bytes))
+        return bytearray(b''.join(shorts))
 
     def _float_to_unsigned_short(self, value: float) -> int:
         return int(((value * 0.5) + 0.5) * UNSIGNED_SHORT_MAX)

@@ -10,9 +10,6 @@
 
 namespace osc {
 
-// Inline and direct write modes work only with SAMD51 based boards such as
-// Adafruit Metro M4 (https://www.adafruit.com/product/3382) as they directly
-// access the low-level API.
 class Renderer {
  protected:
   const uint8_t resolution;
@@ -22,10 +19,6 @@ class Renderer {
   Renderer(uint8_t resolution, uint8_t xPin, uint8_t yPin)
       : resolution(resolution), xPin(xPin), yPin(yPin) {
     analogWriteResolution(resolution);
-
-    // Initialize DAC manually (needed by direct write modes)
-    analogWrite(xPin, 0);
-    analogWrite(yPin, 0);
   }
 
   void drawPoint(Point<uint16_t>& point);
@@ -52,6 +45,11 @@ class StandardRenderer : public Renderer {
   }
 };
 
+// Low-level analog write implementation (Teensy 3.6) from Teensy core library:
+// https://github.com/PaulStoffregen/cores/blob/08b835afb8bc4e3adc5b0173b88c20c69abde2a1/teensy3/analog.c#L520-L564
+// Inlining the code dramatically improves performance as the write function
+// call in rendering loop is bypassed.
+typedef int16_t __attribute__((__may_alias__)) aliased_int16_t;
 class InlineRenderer : public Renderer {
  public:
   InlineRenderer(uint8_t resolution, uint8_t xPin, uint8_t yPin)
@@ -59,29 +57,13 @@ class InlineRenderer : public Renderer {
 
  protected:
   inline void dacWrite(uint32_t x, uint32_t y, uint32_t shift) {
-    while (!DAC->STATUS.bit.READY0)
-      ;
-    while (DAC->SYNCBUSY.bit.DATA0)
-      ;
-    DAC->DATA[0].reg = x << shift;
+    SIM_SCGC2 |= SIM_SCGC2_DAC0;
+    DAC0_C0 = DAC_C0_DACEN | DAC_C0_DACRFS;  // 3.3V VDDA is DACREF_2
+    *(volatile aliased_int16_t*)&(DAC0_DAT0L) = x << shift;
 
-    while (!DAC->STATUS.bit.READY1)
-      ;
-    while (DAC->SYNCBUSY.bit.DATA1)
-      ;
-    DAC->DATA[1].reg = y << shift;
-  }
-};
-
-class DirectRenderer : public Renderer {
- public:
-  DirectRenderer(uint8_t resolution, uint8_t xPin, uint8_t yPin)
-      : Renderer(resolution, xPin, yPin) {}
-
- protected:
-  inline void dacWrite(uint32_t x, uint32_t y, uint32_t shift) {
-    DAC->DATA[0].reg = x << shift;
-    DAC->DATA[1].reg = y << shift;
+    SIM_SCGC2 |= SIM_SCGC2_DAC1;
+    DAC1_C0 = DAC_C0_DACEN | DAC_C0_DACRFS;  // 3.3V VDDA is DACREF_2
+    *(volatile aliased_int16_t*)&(DAC1_DAT0L) = y << shift;
   }
 };
 
