@@ -62,7 +62,7 @@ if __name__ == '__main__':
     phase = .0
     while True:
         # Create transformation matrix
-        translation = Matrix44.from_translation([sin(phase), 0, 5.0])
+        translation = Matrix44.from_translation([sin(phase), 0, 4.0])
         rotation = Matrix44.from_eulers([0, phase, phase * 0.5])
         projection = Matrix44.perspective_projection(45.0, 1.0, 0.01, 100.0)
         matrix = projection * translation * rotation
@@ -80,6 +80,6 @@ if __name__ == '__main__':
                          if clipped is not None]
 
         api.send(clipped_lines)
-        phase += 0.02
+        phase += 0.01
 
-        sleep(0.01)
+        sleep(0.001)
