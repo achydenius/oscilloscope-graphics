@@ -3,7 +3,7 @@ from math import sin
 from time import sleep
 from pyrr import Vector3, Matrix44
 
-SERIAL_PORT_NAME = '/dev/cu.usbmodem1432201'
+SERIAL_PORT_NAME = '/dev/cu.usbmodem69352701'
 SERIAL_PORT_BAUDRATE = 115200
 
 

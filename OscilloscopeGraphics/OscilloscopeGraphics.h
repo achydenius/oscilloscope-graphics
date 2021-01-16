@@ -8,7 +8,6 @@ namespace osc {
 class OscilloscopeGraphics {
   Renderer& renderer;
   UInt16Consumer& consumer;
-  Buffer<Line<uint16_t>>* lines;
   Point<uint16_t> blankingPoint = {0, 0};
 
  public:
@@ -23,7 +22,7 @@ class OscilloscopeGraphics {
   UInt16Consumer& getConsumer() { return consumer; }
 
   void getAndRenderLines() {
-    lines = consumer.getLines();
+    Buffer<Line<uint16_t>>* lines = consumer.getLines();
 
     for (int i = 0; i < lines->count(); i++) {
       renderer.drawLine((*lines)[i]);
