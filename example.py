@@ -50,7 +50,8 @@ def find_edges(faces):
 
 
 def edges_to_lines(edges, vertices):
-    return [(vertices[edge[0]], vertices[edge[1]]) for edge in edges]
+    line_brightness = 0.5
+    return [(vertices[edge[0]], vertices[edge[1]], line_brightness) for edge in edges]
 
 
 if __name__ == '__main__':

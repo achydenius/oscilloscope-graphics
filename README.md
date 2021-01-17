@@ -1,6 +1,6 @@
 # Oscilloscope Graphics for Teensy microcontroller
 
-The library is being developed with with [Teensy 3.6](https://www.pjrc.com/store/teensy36.html) but other Teensys with two DACs might work as well.
+The library is being developed with [Teensy 3.6](https://www.pjrc.com/store/teensy36.html) but other Teensys with two DACs might work as well.
 
 ![Picture of oscilloscope running an example](https://raw.githubusercontent.com/achydenius/oscilloscope-graphics/master/media-lab-demo-day.jpg)
 
@@ -17,7 +17,7 @@ The library consists of two parts:
 1. Install the Oscilloscope Graphics library by moving the _OscilloscopeGraphics_ folder to Arduino _libraries_ folder
 2. Open _oscilloscope-graphics.ino_ with Teensyduino and compile and upload the sketch
 
-## MacOS/Python
+### MacOS/Python
 
 [Python 3](https://www.python.org/) and [Pipenv](https://github.com/pypa/pipenv) are required for installing and running the library and example code. 
 

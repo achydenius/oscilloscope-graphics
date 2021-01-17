@@ -5,14 +5,13 @@
 
 namespace osc {
 
-template <typename T>
 struct Point {
-  T x, y;
+  uint16_t x, y;
 };
 
-template <typename T>
 struct Line {
-  Point<T> a, b;
+  Point a, b;
+  uint16_t z;
 };
 
 template <typename T>

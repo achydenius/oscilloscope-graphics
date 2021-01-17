@@ -20,18 +20,17 @@ class Api:
 
     def _lines_to_serial_data(self, lines: List[Line]) -> bytearray:
         # Flatten line coordinates to a one-dimensional list
-        coords = [coord
-                  for line in lines
-                  for coords in line
-                  for coord in coords]
+        coords: List[float] = []
+        for line in lines:
+            coords.extend(line.a + line.b + (line.z,))
 
         # Format coordinates as unsigned shorts
         shorts = [struct.pack('<H', self._float_to_unsigned_short(coord))
-                 for coord in coords]
+                  for coord in coords]
 
         # First two bytes define the list size in bytes
         shorts.insert(0, (len(coords) * 2).to_bytes(
-           2, byteorder='little', signed=False))
+            2, byteorder='little', signed=False))
 
         return bytearray(b''.join(shorts))
 
