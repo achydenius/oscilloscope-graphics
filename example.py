@@ -49,8 +49,7 @@ def find_edges(faces):
     return edges
 
 
-def edges_to_lines(edges, vertices):
-    line_brightness = 0.5
+def edges_to_lines(edges, vertices, line_brightness):
     return [(vertices[edge[0]], vertices[edge[1]], line_brightness) for edge in edges]
 
 
@@ -70,12 +69,21 @@ if __name__ == '__main__':
 
         # Transform vertices, remove hidden faces and find edges
         vertices = [matrix * vertex for vertex in mesh['vertices']]
-        faces = [face for face in mesh['faces']
-                 if calculate_normal(vertices, face).z > 0]
-        edges = find_edges(faces)
+
+        # TODO: Clean up this stuff
+        visible_faces = []
+        hidden_faces = []
+        for face in mesh['faces']:
+            if calculate_normal(vertices, face).z > 0:
+                visible_faces.append(face)
+            else:
+                hidden_faces.append(face)
+
+        visible_edges = find_edges(visible_faces)
+        hidden_edges = find_edges(hidden_faces)
 
         # Clip lines
-        lines = edges_to_lines(edges, vertices)
+        lines = edges_to_lines(visible_edges, vertices, 0.001) + edges_to_lines(hidden_edges, vertices, 0.0225)
         clipped_lines = [clipped
                          for clipped in [clip_line(line, viewport) for line in lines]
                          if clipped is not None]

@@ -1,6 +1,8 @@
 #ifndef __CONSUMER__
 #define __CONSUMER__
 
+#include <Wire.h>
+
 #include "types.h"
 
 namespace osc {
@@ -9,23 +11,24 @@ template <typename T>
 class Consumer {
   long speed;
   char* serialBuffer;
-  Buffer<T>* parsedBuffer;
+  Buffer<T> parsedBuffer;
 
  public:
   Consumer(int serialBufferSize, int parsedBufferLength, unsigned long speed)
-      : speed(speed) {
+      : speed(speed), parsedBuffer(parsedBufferLength) {
     serialBuffer = new char[serialBufferSize];
-    parsedBuffer = new Buffer<T>(parsedBufferLength);
   }
 
-  ~Consumer() {
-    delete serialBuffer;
-    delete parsedBuffer;
-  }
+  ~Consumer() { delete serialBuffer; }
 
-  void start() { Serial.begin(speed); };
+  void start() {
+    Serial.begin(speed);
+    // TODO: Move this elsewhere?
+    Wire.begin();
+    Wire.setClock(3400000);
+  };
 
-  Buffer<T>* readAndParse() {
+  Buffer<T>& readAndParse() {
     if (Serial.available()) {
       uint16_t length;
       Serial.readBytes((char*)&length, 2);
@@ -37,7 +40,7 @@ class Consumer {
 
  protected:
   virtual void parseData(const char* data, size_t length,
-                         Buffer<T>* parsedBuffer) = 0;
+                         Buffer<T>& parsedBuffer) = 0;
 };
 
 }  // namespace osc
