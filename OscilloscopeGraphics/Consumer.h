@@ -1,8 +1,6 @@
 #ifndef __CONSUMER__
 #define __CONSUMER__
 
-#include <Wire.h>
-
 #include "types.h"
 
 namespace osc {
@@ -21,12 +19,7 @@ class Consumer {
 
   ~Consumer() { delete serialBuffer; }
 
-  void start() {
-    Serial.begin(speed);
-    // TODO: Move this elsewhere?
-    Wire.begin();
-    Wire.setClock(3400000);
-  };
+  void start() { Serial.begin(speed); };
 
   Buffer<T>& readAndParse() {
     if (Serial.available()) {
