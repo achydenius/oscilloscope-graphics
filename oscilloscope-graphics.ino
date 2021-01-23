@@ -1,9 +1,8 @@
 #include <OscilloscopeGraphics.h>
 
 osc::InlineRenderer renderer(10, A21, A22);
-osc::UInt16Consumer consumer(115200);
-osc::OscilloscopeGraphics gfx(renderer, consumer);
+osc::DefaultGraphics gfx(renderer);
 
-void setup() { gfx.getConsumer().start(); }
+void setup() { gfx.start(); }
 
 void loop() { gfx.getAndRenderLines(); }

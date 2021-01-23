@@ -21,8 +21,8 @@ class Renderer {
     analogWriteResolution(resolution);
   }
 
-  void drawPoint(Point<uint16_t>& point);
-  void drawLine(Line<uint16_t>& line);
+  void drawPoint(Point& point);
+  void drawLine(Line& line);
 
  protected:
   virtual void dacWrite(uint32_t x, uint32_t y, uint32_t shift) = 0;

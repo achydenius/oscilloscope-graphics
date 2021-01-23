@@ -8,30 +8,32 @@ namespace osc {
 template <typename T>
 class Consumer {
   long speed;
-  Buffer<Line<T>>* lines;
-  char* buffer;
+  char* serialBuffer;
+  Buffer<T> parsedBuffer;
 
  public:
-  Consumer(int maxLines, int bytesPerLine, unsigned long speed) : speed(speed) {
-    lines = new Buffer<Line<T>>(maxLines);
-    buffer = new char[maxLines * bytesPerLine];
+  Consumer(int serialBufferSize, int parsedBufferLength, unsigned long speed)
+      : speed(speed), parsedBuffer(parsedBufferLength) {
+    serialBuffer = new char[serialBufferSize];
   }
+
+  ~Consumer() { delete serialBuffer; }
 
   void start() { Serial.begin(speed); };
 
-  Buffer<Line<T>>* getLines() {
+  Buffer<T>& readAndParse() {
     if (Serial.available()) {
       uint16_t length;
       Serial.readBytes((char*)&length, 2);
-      Serial.readBytes(buffer, length);
-      parseData(buffer, length, lines);
+      Serial.readBytes(serialBuffer, length);
+      parseData(serialBuffer, length, parsedBuffer);
     }
-    return lines;
+    return parsedBuffer;
   };
 
  protected:
   virtual void parseData(const char* data, size_t length,
-                         Buffer<Line<T>>* lines) = 0;
+                         Buffer<T>& parsedBuffer) = 0;
 };
 
 }  // namespace osc

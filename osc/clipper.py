@@ -11,6 +11,7 @@ class Point(NamedTuple):
 class Line(NamedTuple):
     a: Point
     b: Point
+    z: float
 
 
 def sub(a: Point, b: Point) -> Point:
@@ -52,7 +53,7 @@ class Polygon:
 # https://en.wikipedia.org/wiki/Cyrus%E2%80%93Beck_algorithm
 #
 def clip_line(line: Line, polygon: Polygon) -> Optional[Line]:
-    a, b = line
+    a, b, z = line
     [te, tl] = [0.0, 1.0]
 
     p1p0 = sub(b, a)
@@ -76,5 +77,6 @@ def clip_line(line: Line, polygon: Polygon) -> Optional[Line]:
 
     return Line(
         Point(a.x + p1p0.x * te, a.y + p1p0.y * te),
-        Point(a.x + p1p0.x * tl, a.y + p1p0.y * tl)
+        Point(a.x + p1p0.x * tl, a.y + p1p0.y * tl),
+        z
     )

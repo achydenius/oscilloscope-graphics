@@ -2,7 +2,7 @@
 
 using namespace osc;
 
-void Renderer::drawPoint(Point<uint16_t>& point) {
+void Renderer::drawPoint(Point& point) {
   int32_t x = transform(point.x);
   int32_t y = transform(point.y);
   uint32_t shift = DAC_MAX_RESOLUTION_BITS - resolution;
@@ -16,7 +16,7 @@ void Renderer::drawPoint(Point<uint16_t>& point) {
  * DDA line drawing algorithm implementation:
  * https://www.geeksforgeeks.org/dda-line-generation-algorithm-computer-graphics/
  */
-void Renderer::drawLine(Line<uint16_t>& line) {
+void Renderer::drawLine(Line& line) {
   int32_t x0 = transform(line.a.x);
   int32_t y0 = transform(line.a.y);
   int32_t x1 = transform(line.b.x);
