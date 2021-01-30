@@ -1,49 +1,49 @@
-from osc import clip_line
-from pyrr import vector3, Matrix44, matrix44
+from typing import List, Tuple
+from dataclasses import dataclass
+from pyrr import Vector3, vector3, Matrix44, matrix44
+from osc import clip_line, Polygon, Line
+
+Edge = Tuple[int, int]
 
 
+@dataclass
+class Face:
+    vertices: List[int]
+    edges: List[int]
+
+
+@dataclass
+class Mesh:
+    vertices: List[Vector3]
+    faces: List[Face]
+    edges: List[Edge]
+
+
+@dataclass
 class Object:
-    def __init__(self, mesh):
-        self.mesh = mesh
-        self.matrix = Matrix44()
-        self.rotation = [0, 0, 0]
-        self.translation = [0, 0, 0]
-
-    def set_rotation(self, pitch, roll, yaw):
-        self.rotation = [pitch, roll, yaw]
-
-    def set_translation(self, x, y, z):
-        self.translation = [x, y, z]
+    mesh: Mesh
+    rotation: Tuple[float, float, float] = (0, 0, 0)
+    translation: Tuple[float, float, float] = (0, 0, 0)
 
 
+@dataclass
 class Camera:
-    def __init__(self, fovy, aspect, near, far):
-        self.fovy = fovy
-        self.aspect = aspect
-        self.near = near
-        self.far = far
-        self.eye = [0, 0, 0]
-        self.target = [0, 0, 0]
-
-    def set_eye(self, x, y, z):
-        self.eye = [x, y, z]
-
-    def set_target(self, x, y, z):
-        self.target = [x, y, z]
+    fovy: float
+    aspect: float
+    near: float
+    far: float
+    eye: Tuple[float, float, float] = (0, 0, 0)
+    target: Tuple[float, float, float] = (0, 0, 0)
 
 
-def cull_face(vertices, face, side='back'):
+def cull_face(vertices: List[Vector3], face: Face, side: str = 'back') -> bool:
     z = vector3.generate_normals(vertices[face.vertices[0]],
                                  vertices[face.vertices[1]],
                                  vertices[face.vertices[2]])[2]
     return z >= 0 if side == 'back' else z < 0
 
 
-def edges_to_lines(edges, vertices, line_brightness):
-    return [(vertices[edge[0]], vertices[edge[1]], line_brightness) for edge in edges]
-
-
-def find_edges(faces, edges):
+def find_edges(faces: List[Face], edges: List[Edge]) -> List[Edge]:
     indices = set()
     for face in faces:
         for index in face.edges:
@@ -52,7 +52,11 @@ def find_edges(faces, edges):
     return list([edges[index] for index in indices])
 
 
-def generate_lines(obj, camera, viewport, front_brightness, back_brightness):
+def edges_to_lines(edges: List[Edge], vertices: List[Vector3], line_brightness: float) -> List[Line]:
+    return [Line(vertices[edge[0]], vertices[edge[1]], line_brightness) for edge in edges]
+
+
+def generate_lines(obj: Object, camera: Camera, viewport: Polygon, front_brightness: float, back_brightness: float) -> List[Line]:
     # Create transformation matrix
     translation = Matrix44.from_translation(obj.translation)
     rotation = Matrix44.from_eulers(obj.rotation)

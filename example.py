@@ -1,6 +1,6 @@
 from osc import Api, Polygon
 from osc.viewer import generate_lines, Object, Camera
-from osc.mesh import create_icosahedron
+from osc.viewer.mesh import create_icosahedron
 from math import sin
 from time import sleep
 from pyrr import Matrix44
@@ -19,10 +19,10 @@ if __name__ == '__main__':
 
     phase = .0
     while True:
-        obj.set_translation(sin(phase), 0, 0)
-        obj.set_rotation(0, phase, phase * 0.5)
-        camera.set_eye(0, 0, 4.0)
-        camera.set_target(0, 0, 0)
+        obj.translation = (sin(phase), 0, 0)
+        obj.rotation = (0, phase, phase * 0.5)
+        camera.eye = (0, 0, 4.0)
+        camera.target = (0, 0, 0)
 
         clipped_lines = generate_lines(obj, camera, viewport, 0.001, 0.0225)
         api.send(clipped_lines)
