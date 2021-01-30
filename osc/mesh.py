@@ -1,4 +1,19 @@
 from pyrr import Vector3
+from dataclasses import dataclass
+from typing import List, Tuple
+
+
+@dataclass
+class Face:
+    vertices: List[int]
+    edges: List[int]
+
+
+@dataclass
+class Mesh:
+    vertices: List[Vector3]
+    faces: List[Face]
+    edges: List[Tuple[int, int]]
 
 
 def find_edge_index(edge, edges):
@@ -24,16 +39,9 @@ def create_mesh(vertices, indices):
                 edge_index = len(all_edges) - 1
             edges.append(edge_index)
 
-        faces.append({
-            'indices': inds,
-            'edges': edges
-        })
+        faces.append(Face(inds, edges))
 
-    return {
-        'vertices': vertices,
-        'faces': faces,
-        'edges': all_edges,
-    }
+    return Mesh(vertices, faces, all_edges)
 
 
 def create_icosahedron():
