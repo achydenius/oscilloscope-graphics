@@ -1,5 +1,6 @@
 from osc import Api, Polygon
-from osc.viewer import create_icosahedron, generate_lines
+from osc.viewer import generate_lines
+from osc.mesh import create_icosahedron
 from math import sin
 from time import sleep
 from pyrr import Matrix44
